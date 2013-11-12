@@ -71,6 +71,7 @@ struct ID3TagError : public std::exception {
 	enum Status {
 		NoTag,
 		BadFrame,
+		UnsupportedVersion,
 	};
 
 	explicit ID3TagError (Status status) throw() :
@@ -199,12 +200,16 @@ public:
 	}
 
 public:
-mkk	std::string id () const {
+	std::string id () const {
 		return id_;
 	}
 
 	size_t size () const {
-		return sizeof(Header);
+		switch (container_.revisionVersion()) {
+		case 3: return sizeof(HeaderV3);
+		case 4: return sizeof(HeaderV4);
+		}
+		throw ID3TagError(ID3TagError::UnsupportedVersion);
 	}
 
 	bool discardOnTagAlteration () const {
@@ -296,12 +301,30 @@ private:
 		uint16_t : 1;
 	} __attribute__((packed));
 
-	void readHeader_ (std::ifstream &in) {
-		Header header;
-		in.read((char *)&header, sizeof(Header));
-		if (in.gcount() != sizeof(Header)) {
+	void readHeaderV4_ (std::ifstream &in) {
+		HeaderV4 header;
+		in.read((char *)&header, sizeof(HeaderV4));
+
+		if (in.gcount() != sizeof(HeaderV4)) {
 			throw ID3TagError(ID3TagError::BadFrame);
 		}
+	}
+
+	void readHeaderV3_ (std::ifstream &in) {
+		HeaderV3 header;
+		in.read((char *)&header, sizeof(HeaderV3));
+
+		if (in.gcount() != sizeof(HeaderV3)) {
+			throw ID3TagError(ID3TagError::BadFrame);
+		}
+	}
+
+	void readHeader_ (std::ifstream &in) {
+		if (container_.revisionVersion() == 3) {
+
+		}
+
+
 
 
 	}
