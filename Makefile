@@ -4,9 +4,14 @@ export CXX           = clang++
 export COMMON_FLAGS  = -Wall -Werror
 export CFLAGS        = $(COMMON_FLAGS)
 export CXXFLAGS      = -std=c++11 $(COMMON_FLAGS)
+
 export SOURCES      := $(wildcard $(CURDIR)/sources/*.cpp)
+export SOURCES      += $(wildcard $(CURDIR)/sources/id3/*.cpp)
+
 export OBJECTS      := $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
 export VPATH        := $(CURDIR)/sources
+export VPATH        := $(CURDIR)/sources:$(CURDIR)/sources/id3
+
 export DEPS         := $(CURDIR)/Makefile.depends
 
 .PHONY: all clean depends realclean Debug Release

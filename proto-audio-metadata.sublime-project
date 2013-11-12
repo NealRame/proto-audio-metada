@@ -12,6 +12,7 @@
 		"tab_size": 8,
 		"translate_tabs_to_spaces": false,
 		"sublimeclang_options": [
+			"-ferror-limit=0",
 			"-I/usr/include/x86_64-linux-gnu/c++/4.8",
 			"-I${project_path}/sources"
 		],
