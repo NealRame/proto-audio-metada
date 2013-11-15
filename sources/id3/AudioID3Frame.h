@@ -8,23 +8,14 @@ public:
 
 public:
 	std::string id () const;
-
 	size_t size () const;
-
 	bool discardOnTagAlteration () const;
-
 	bool discardOnFileAlteration () const;
-
 	bool isReadOnly () const;
-
 	bool grouped () const;
-
 	bool deflated () const;
-
 	bool encrypted () const;
-
 	bool unsynchronized () const;
-
 	bool hasDataLengthIndicator () const;
 
 private:

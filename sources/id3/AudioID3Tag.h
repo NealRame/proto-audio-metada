@@ -8,7 +8,6 @@ public:
 
 public:
 	std::string version () const;
-
 	unsigned int majorVersion () const;
 	unsigned int revisionVersion () const;
 	bool unsynchronized () const;
@@ -26,12 +25,6 @@ private:
 
 	size_t size_;
 	size_t updateSize_();
-
-private:
-	// the following are used for serialization/unserialization
-	void readHeader_ (std::ifstream &in);
-	void writeHeader_ (std::ofstream &out);
-	void readExtendedHeader (std::ifstream &in);
 };
 
 
