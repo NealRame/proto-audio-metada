@@ -14,7 +14,10 @@ int main(int argc, char **argv) {
 	std::ifstream input(argv[1], std::ifstream::in|std::ifstream::binary);
 
 	try {
-		ID3Tag tag(input);
+		ID3Tag tag;
+
+		tag.init(input);
+
 		std::cout 
 		<< "version:             " << tag.version() << std::endl
 		<< "size:                " << tag.size() << std::endl
@@ -22,6 +25,7 @@ int main(int argc, char **argv) {
 		<< "has extended header: " << tag.hasExtendedHeader() << std::endl
 		<< "is experimental:     " << tag.isExperimental() << std::endl
 		<< "has footer:          " << tag.hasFooter() << std::endl;
+		
 	} catch (ID3Error e) {
 		std::cerr << "No tag found!" << std::endl;
 		return 1;

@@ -1,12 +1,159 @@
+#include <sstream>
+
 #include "AudioID3Error.h"
 #include "AudioID3Frame.h"
 #include "AudioID3Tag.h"
 
-ID3Frame::ID3Frame (ID3Tag &container, std::ifstream &in) :
-	container_(container) {
-	readHeader_(in);
+
+
+std::istringstream & operator>> (std::istringstream &in, TextIso8859_1 &t) {
+	int c;
+	while (! (in.eof() || (c = in.get()) == 0)) {
+		t.push_back(c);
+	}
+	return in;
 }
 
+std::istringstream & operator>> (std::istringstream &in, TextUtf8 &t) {
+	TextIso8859_1 s;
+	
+	in >> s;
+
+	wchar_t *buf = new wchar_t[s.size()];
+	size_t count = mbstowcs(buf, s.c_str(), s.size());
+
+	t = std::wstring(buf, count);
+
+	return in;
+}
+
+std::istringstream & operator>> (std::istringstream &in, TextUtf16 &t) {
+	t.clear();
+	while (! in.eof()) {
+		char16_t c;
+		in.read((char *)&c, sizeof(c));
+		if (c != 0) {
+			t.push_back(c);
+		} else break;
+	}
+	return in;
+}
+
+std::istringstream & operator>> (std::istringstream &in, Text &t) {
+	t.encoding = static_cast<Text::Encoding>(in.get());
+
+	switch (t.encoding) {
+	case Text::Iso8859_1:
+		in >> boost::get<TextIso8859_1>(t.value);
+		break;
+
+	case Text::Utf16:
+	case Text::Utf16BE:
+		in >> boost::get<TextUtf16>(t.value);
+		break;
+
+	case Text::Utf8:
+		in >> boost::get<TextUtf8>(t.value);
+		break;
+	}
+
+	return in;
+}
+
+struct HeaderV3 {
+	char id[4];
+	uint32_t size;
+	uint16_t discardOnTagAlteration : 1;
+	uint16_t discardOnFileAlteration : 1;
+	uint16_t readOnly : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t deflated : 1;
+	uint16_t encrypted : 1;
+	uint16_t grouped : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+} __attribute__((packed));
+
+struct HeaderV4 {
+	char id[4];
+	uint32_t size;
+	uint16_t : 1;
+	uint16_t discardOnTagAlteration : 1;
+	uint16_t discardOnFileAlteration : 1;
+	uint16_t readOnly : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t grouped : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t : 1;
+	uint16_t deflated : 1;
+	uint16_t encrypted : 1;
+	uint16_t unsynchronized : 1;
+	uint16_t dataLengthIndicator : 1;
+} __attribute__((packed));
+
+template <typename FrameHeader>
+FrameHeader readFrameHeader_ (std::ifstream &in) {
+	FrameHeader header;
+
+	in.read((char *)&header, sizeof(header));
+
+	if (in.gcount() < sizeof(header)) {
+		throw ID3Error(ID3Error::BadFrame);		
+	}
+
+	return header;
+}
+
+ID3Frame::ID3Frame (ID3Tag &container) :
+	container_(container) {
+}
+
+std::ifstream & ID3Frame::operator>> (std::ifstream &in) {
+	unsigned int major = container_.majorVersion();
+	if (major == 3) {
+		HeaderV3 header = readFrameHeader_<HeaderV3>(in);
+		
+		discardOnTagAlteration_ = header.discardOnTagAlteration;
+		discardOnFileAlteration_ = header.discardOnFileAlteration;
+		readOnly_ = header.readOnly;
+		grouped_ = header.grouped;
+		deflated_ = header.deflated;
+		encrypted_ = header.encrypted;
+		unsynchronized_ = false;
+		dataLengthIndicator_ = false;
+	} else
+	if (major == 4) {
+		HeaderV4 header = readFrameHeader_<HeaderV4>(in);
+		
+		discardOnTagAlteration_ = header.discardOnTagAlteration;
+		discardOnFileAlteration_ = header.discardOnFileAlteration;
+		readOnly_ = header.readOnly;
+		grouped_ = header.grouped;
+		deflated_ = header.deflated;
+		encrypted_ = header.encrypted;
+		unsynchronized_ = header.unsynchronized;
+		dataLengthIndicator_ = header.dataLengthIndicator;
+	} else {
+		throw ID3Error(ID3Error::UnsupportedVersion);
+	}
+
+	return in;
+}
+
+std::ofstream & ID3Frame::operator<< (std::ofstream &out) {
+	return out;
+}
 
 std::string ID3Frame::id () const {
 	return id_;
@@ -50,53 +197,4 @@ bool ID3Frame::unsynchronized () const {
 
 bool ID3Frame::hasDataLengthIndicator () const {
 	return dataLengthIndicator_;
-}
-
-void ID3Frame::readHeaderV3_ (std::ifstream &in) {
-	HeaderV3 header;
-	in.read((char *)&header, sizeof(HeaderV3));
-
-	if (in.gcount() != sizeof(HeaderV3)) {
-		throw ID3Error(ID3Error::BadFrame);
-	}
-
-	discardOnTagAlteration_ = header.discardOnTagAlteration;
-	discardOnFileAlteration_ = header.discardOnFileAlteration;
-	readOnly_ = header.readOnly;
-	grouped_ = header.grouped;
-	deflated_ = header.deflated;
-	encrypted_ = header.encrypted;
-	unsynchronized_ = false;
-}
-
-void ID3Frame::readHeaderV4_ (std::ifstream &in) {
-	HeaderV4 header;
-	in.read((char *)&header, sizeof(HeaderV4));
-
-	if (in.gcount() != sizeof(HeaderV4)) {
-		throw ID3Error(ID3Error::BadFrame);
-	}
-
-	discardOnTagAlteration_ = header.discardOnTagAlteration;
-	discardOnFileAlteration_ = header.discardOnFileAlteration;
-	readOnly_ = header.readOnly;
-	grouped_ = header.grouped;
-	deflated_ = header.deflated;
-	encrypted_ = header.encrypted;
-	unsynchronized_ = header.unsynchronized;
-}
-
-void ID3Frame::readHeader_ (std::ifstream &in) {
-	switch (container_.revisionVersion()) {
-	case 3:
-		readHeaderV3_(in);
-		break;
-
-	case 4:
-		readHeaderV4_(in);
-		break;
-
-	default:
-		throw ID3Error(ID3Error::UnsupportedVersion);
-	}
 }

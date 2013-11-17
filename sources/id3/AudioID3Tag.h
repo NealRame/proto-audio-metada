@@ -4,7 +4,11 @@
 
 class ID3Tag {
 public:
-	ID3Tag (std::ifstream &in);
+	ID3Tag ();
+
+public:
+	void init (const std::string &);
+	void init (std::ifstream &);
 
 public:
 	std::string version () const;

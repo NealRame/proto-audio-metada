@@ -48,10 +48,10 @@ void writeHeader_ (const ID3Tag &tag, std::ofstream &out) {
 }
 
 struct ExtendedHeaderV3 {
-		uint32_t size;
-		uint16_t crcFlag : 1;
-		uint32_t paddingSize;
-	} __attribute__((packed));
+	uint32_t size;
+	uint16_t crcFlag : 1;
+	uint32_t paddingSize;
+} __attribute__((packed));
 
 struct ExtendedHeaderV4 {
 	uint32_t size;
@@ -97,7 +97,15 @@ void skipExtendedHeader (const ID3Tag & tag, std::ifstream &in) {
 	}
 }
 
-ID3Tag::ID3Tag (std::ifstream &in) {
+ID3Tag::ID3Tag () {
+}
+
+void ID3Tag::init (const std::string &filepath) {
+	std::ifstream input(filepath, std::ifstream::in|std::ifstream::binary);
+	init(input);
+}
+
+void ID3Tag::init (std::ifstream &in) {
 	std::ios::iostate state = in.exceptions();
 
 	// Reset the exceptions state of in on exit
