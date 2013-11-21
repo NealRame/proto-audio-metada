@@ -9,6 +9,12 @@
 
 class Buffer {
 public:
+	template<typename T>
+	static Buffer createBuffer(unsigned int count) {
+		return Buffer(sizeof(T)*count); 
+	}
+	
+public:
 	explicit Buffer (size_t size = 0);
 	Buffer (size_t size, size_t capacity);
 	Buffer (const void *, size_t size);
