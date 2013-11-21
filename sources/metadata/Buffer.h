@@ -3,8 +3,94 @@
 
 #include <cstdint>
 #include <string>
+#include <iterator>
 
 class Buffer {
+public:
+	template <typename T> 
+	class iterator : std::iterator<std::random_access_iterator_tag, T> {
+	public:
+		iterator () : iterator(nullptr) { }
+		iterator(const iterator &it) : iterator(it.ptr_) { }
+		iterator & operator= (const iterator& it) { ptr_ = it.ptr_; }
+		iterator & operator++ () { 
+			ptr_ += 1; 
+			return *this;
+		}
+		iterator operator++ (int) {
+			iterator it(*this);
+			(*this)++;
+			return it;	
+		}
+		iterator & operator-- () { 
+			ptr_ -= 1; 
+			return *this;
+		}
+		iterator operator-- (int) {
+			iterator it(*this);
+			(*this)--;
+			return it;
+		}
+		bool operator<  (const iterator &it) const {
+			return ptr_ < it.ptr_;
+		}
+		bool operator>  (const iterator &it) const {
+			return ptr_ > it.ptr_;
+		}
+		bool operator<= (const iterator &it) const {
+			return ! (*this > it);
+		}
+		bool operator>= (const iterator &it) const {
+			return ! (*this < it);
+		}
+		bool operator== (const iterator &it) const {
+			return ptr_ == it.ptr_; 
+		}
+		bool operator!= (const iterator &it) const {
+			return ptr_ != it.ptr_;
+		}
+		iterator operator+ (int i) {
+			return iterator(ptr_ + i);
+		}
+		iterator operator+ (unsigned int i) {
+			return iterator(ptr_ + i);
+		}
+		iterator operator- (int i) {
+			return iterator(ptr_ - i);
+		}
+		iterator operator- (unsigned int i) {
+			return iterator(ptr_ - i);
+		}
+		iterator & operator+= (int i) {
+			ptr_ += i;
+			return *this;
+		}
+		iterator & operator+= (unsigned int i) {
+			ptr_ += i;
+			return *this;
+		}
+		iterator & operator-= (int i) {
+			ptr_ -= i;
+			return *this;
+		}
+		iterator & operator-= (unsigned int i) {
+			ptr_ -= i;
+			return *this;
+		}
+		T & operator[] (unsigned int i) {
+			return *(ptr_ + i);
+		}
+		T operator[] (unsigned int i) const {
+			return *(ptr_ + i);
+		}
+		T & operator* () { return *static_cast<T *>(ptr_); }
+		T * operator-> () { return static_cast<T *>(ptr_); }
+
+	private:
+		iterator (void *ptr) : ptr_(ptr) { }
+		T *ptr_;
+	};
+
 public:
 	explicit Buffer (size_t size = 0);
 	Buffer (size_t size, size_t capacity);
