@@ -1,16 +1,16 @@
 export TARGET        = audio-metada
 export CC            = clang		
 export CXX           = clang++
-export COMMON_FLAGS  = -Wall -Werror
+export COMMON_FLAGS  = -Wall -Werror -I$(CURDIR)/vendors/utf8
 export CFLAGS        = $(COMMON_FLAGS)
 export CXXFLAGS      = -std=c++11 $(COMMON_FLAGS)
 
 export SOURCES      := $(wildcard $(CURDIR)/sources/*.cpp)
 export SOURCES      += $(wildcard $(CURDIR)/sources/id3/*.cpp)
+export SOURCES      += $(wildcard $(CURDIR)/sources/metadata/*.cpp)
 
 export OBJECTS      := $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
-export VPATH        := $(CURDIR)/sources
-export VPATH        := $(CURDIR)/sources:$(CURDIR)/sources/id3
+export VPATH        := $(CURDIR)/sources:$(CURDIR)/sources/id3:$(CURDIR)/sources/metadata
 
 export DEPS         := $(CURDIR)/Makefile.depends
 

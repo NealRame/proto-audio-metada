@@ -1,9 +1,14 @@
 #include <fstream>
+#include <locale>
 #include <iostream>
+#include <iomanip>
 #include <string>
+
+#include "utf8.h"
 
 #include "id3/AudioID3Tag.h"
 #include "id3/AudioID3Error.h"
+
 
 int main(int argc, char **argv) {
 	if (argc < 2) {

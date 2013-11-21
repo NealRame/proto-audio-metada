@@ -14,7 +14,8 @@
 		"sublimeclang_options": [
 			"-ferror-limit=0",
 			"-I/usr/include/x86_64-linux-gnu/c++/4.8",
-			"-I${project_path}/sources"
+			"-I${project_path}/sources",
+			"-I${project_path}/vendors/utf8",
 		],
 		"sublimeclang_additional_language_options": {
 			"c++": [ "-std=c++11" ]
