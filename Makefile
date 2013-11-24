@@ -1,18 +1,24 @@
-export TARGET        = audio-metada
-export CC            = clang		
-export CXX           = clang++
-export COMMON_FLAGS  = -Wall -Werror -I$(CURDIR)/vendors/utf8
-export CFLAGS        = $(COMMON_FLAGS)
-export CXXFLAGS      = -std=c++11 $(COMMON_FLAGS)
+TARGET        = audio-metada
+CC            = clang		
+CXX           = clang++
+COMMON_FLAGS  = -Wall -Werror -I$(CURDIR)/vendors/utf8
+CFLAGS        = $(COMMON_FLAGS)
+CXXFLAGS      = -std=c++11 $(COMMON_FLAGS)
 
-export SOURCES      := $(wildcard $(CURDIR)/sources/*.cpp)
-export SOURCES      += $(wildcard $(CURDIR)/sources/id3/*.cpp)
-export SOURCES      += $(wildcard $(CURDIR)/sources/metadata/*.cpp)
+SOURCES      := $(wildcard $(CURDIR)/sources/*.cpp)
+SOURCES      += $(wildcard $(CURDIR)/sources/id3/*.cpp)
+SOURCES      += $(wildcard $(CURDIR)/sources/metadata/*.cpp)
+SOURCES      += $(wildcard $(CURDIR)/sources/utils/*.cpp)
 
-export OBJECTS      := $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
-export VPATH        := $(CURDIR)/sources:$(CURDIR)/sources/id3:$(CURDIR)/sources/metadata
+OBJECTS      := $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
 
-export DEPS         := $(CURDIR)/Makefile.depends
+VPATH        := $(CURDIR)/sources
+VPATH        := $(VPATH):$(CURDIR)/sources/id3
+VPATH        := $(VPATH):$(CURDIR)/sources/metadata
+VPATH        := $(VPATH):$(CURDIR)/sources/utils
+DEPS         := $(CURDIR)/Makefile.depends
+
+export
 
 .PHONY: all clean depends realclean Debug Release
 

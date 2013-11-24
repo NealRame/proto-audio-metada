@@ -57,25 +57,16 @@ Buffer & Buffer::operator=(const Buffer &buffer) {
 	return *this;
 }
 
-void Buffer::swap (Buffer &buffer) {
-	std::swap(data_, buffer.data_);
-	std::swap(size_, buffer.size_);
-	std::swap(capacity_, buffer.capacity_);
-}
-
 void Buffer::assign (const void *d, size_t l) {
-	size_ = l;
-	capacity_ = std::max(size_, l);
-	data_ = realloc(data_, capacity_);
+	reserve(capacity_ = std::max(size_, l));
 	memcpy((uint8_t *)data_, d, l);
+	size_ = l;
 }
 
 void Buffer::append (const void *d, size_t l) {
-	size_t new_size = size_ + l;
-	capacity_ = std::max(capacity_, new_size);
-	data_ = realloc(data_, capacity_);
+	reserve(std::max(capacity_, size_ + l));
 	memcpy((uint8_t *)data_ + size_, d, l);
-	size_ = new_size;
+	size_ += l;
 }
 
 void Buffer::append (const Buffer &buffer) {
@@ -83,20 +74,15 @@ void Buffer::append (const Buffer &buffer) {
 }
 
 void Buffer::append (const std::string &s) {
-	append(s.c_str(), s.length()+1);
-}
-
-void Buffer::fill (uint8_t value) {
-	memset(data_, value, size_);
+	append(s.c_str(), s.length() + 1);
 }
 
 void Buffer::clear () {
 	size_ = 0;
 }
 
-void Buffer::shrink (size_t size) {
-	capacity_ = std::min(size, capacity_);
-	data_ = realloc(data_, capacity_);
+void Buffer::fill (uint8_t value) {
+	memset(data_, value, size_);
 }
 
 uint8_t & Buffer::at (size_t pos) {
@@ -105,4 +91,23 @@ uint8_t & Buffer::at (size_t pos) {
 
 uint8_t Buffer::at (size_t pos) const {
 	return ((uint8_t *)data_)[pos];
+}
+
+void Buffer::reserve (size_t c) {
+	data_ = realloc(data_, c);
+	capacity_ = c;
+}
+
+void Buffer::extend (size_t c) {
+	reserve(capacity_ + c);
+}
+
+void Buffer::shrink (size_t c) {
+	reserve(capacity_ < c ? 0 : capacity_ - c);
+}
+
+void Buffer::swap (Buffer &buffer) {
+	std::swap(data_, buffer.data_);
+	std::swap(size_, buffer.size_);
+	std::swap(capacity_, buffer.capacity_);
 }
