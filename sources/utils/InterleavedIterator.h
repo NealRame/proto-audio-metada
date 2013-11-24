@@ -56,12 +56,12 @@ public:
 	}
 	template<typename IntegralType> 
 	interleaved_iterator & operator+= (IntegralType i) {
-		it_ += 2*i;
+		it_ += N*i;
 		return *this;
 	}
 	template<typename IntegralType>
 	interleaved_iterator & operator-= (IntegralType i) {
-		it_ -= 2*i;
+		it_ -= N*i;
 		return *this;
 	}
 	interleaved_iterator & operator++ () { return *this += 1; }
@@ -76,24 +76,148 @@ public:
 		--(*this);
 		return it;
 	}
-	std::pair<T &, T &> operator* () {
-		return std::pair<T &, T &>(*it_, *(it_+1));
-	}
-	std::pair<T &, T &> * operator-> () {
-		pair_ = *this;
-		return &pair_;
-	}
-	std::pair<T &, T &> operator[] (unsigned int i) { return *(it_ + i); }
-	std::pair<const T &, const T &> operator[] (unsigned int i) const {
-		iterator it = *this + i;
-		return std::pair<T, T>(*it_, *(it_ + 1));
-	}
+	std::array<T &, N> operator* ();
+	std::array<const T &, N> operator* () const;
+	std::array<T &, N> operator[] (unsigned int i);
+	std::array<T, N> operator[] (unsigned int i) const;
 
 private:
 	iterator it_;
-	std::array<T &, size_t N> values_;
 };
 
+template<typename T, size_t N>
+Buffer interlace (const std::array<Buffer, N> &buffer) {
+	return Buffer();
+}
 
+template<typename T>
+std::array<T &, 1> interleaved_iterator<T, 1>::operator* () {
+	return std::array<T, 1>{ *it_ };
+}
+template<typename T>
+std::array<const T &, 1> interleaved_iterator<T, 1>::operator* () const {
+	return std::array<T, 1>{ *it_ };
+}
+template<typename T>
+std::array<T &, 2> interleaved_iterator<T, 2>::operator* () {
+	return std::array<T, 2>{ *it_, *(it_ + 1) };
+}
+template<typename T>
+std::array<const T &, 2> interleaved_iterator<T, 2>::operator* () const {
+	return std::array<T, 2>{ *it_, *(it_ + 1) };
+}
+template<typename T>
+std::array<T &, 3> interleaved_iterator<T, 3>::operator* () {
+	return std::array<T, 3>{ *it_, *(it_ + 1), *(it_ + 2) };
+}
+template<typename T>
+std::array<const T &, 3> interleaved_iterator<T, 3>::operator* () const {
+	return std::array<T, 3>{ *it_, *(it_ + 1), *(it_ + 2) };
+}
+template<typename T>
+std::array<T &, 4> interleaved_iterator<T, 4>::operator* () {
+	return std::array<T, 4>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3) };
+}
+template<typename T>
+std::array<const T &, 4> interleaved_iterator<T, 4>::operator* () const {
+	return std::array<T, 4>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3) };
+}
+template<typename T>
+std::array<T &, 5> interleaved_iterator<T, 5>::operator* () {
+	return std::array<T, 5>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4) };
+}
+template<typename T>
+std::array<const T &, 5> interleaved_iterator<T, 5>::operator* () const {
+	return std::array<T, 5>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4) };
+}
+template<typename T>
+std::array<T &, 6> interleaved_iterator<T, 6>::operator* () {
+	return std::array<T, 6>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4), *(it_ + 5) };
+}
+template<typename T>
+std::array<const T &, 6> interleaved_iterator<T, 6>::operator* () const {
+	return std::array<T, 6>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4), *(it_ + 5) };
+}
+template<typename T>
+std::array<T &, 7> interleaved_iterator<T, 7>::operator* () {
+	return std::array<T, 7>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4), *(it_ + 5), *(it_ + 6) };
+}
+template<typename T>
+std::array<const T &, 7> interleaved_iterator<T, 7>::operator* () const {
+	return std::array<T, 7>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4), *(it_ + 5), *(it_ + 6) };
+}
+template<typename T>
+std::array<T &, 8> interleaved_iterator<T, 8>::operator* () {
+	return std::array<T, 8>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4), *(it_ + 5), *(it_ + 6), *(it_ + 7) };
+}
+template<typename T>
+std::array<const T &, 8> interleaved_iterator<T, 8>::operator* () const {
+	return std::array<T, 8>{ *it_, *(it_ + 1), *(it_ + 2), *(it_ + 3), *(it_ + 4), *(it_ + 5), *(it_ + 6), *(it_ + 7) };
+}
+
+template<typename T>
+std::array<T &, 1> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i) };
+}
+template<typename T>
+std::array<T, 1> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i) };
+}
+template<typename T>
+std::array<T &, 2> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1) };
+}
+template<typename T>
+std::array<T, 2> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1) };
+}
+template<typename T>
+std::array<T &, 3> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2) };
+}
+template<typename T>
+std::array<T, 3> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2) };
+}
+template<typename T>
+std::array<T &, 4> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3) };
+}
+template<typename T>
+std::array<T, 4> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3) };
+}
+template<typename T>
+std::array<T &, 5> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4) };
+}
+template<typename T>
+std::array<T, 5> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4) };
+}
+template<typename T>
+std::array<T &, 6> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4), *(it_ + i + 5) };
+}
+template<typename T>
+std::array<T, 6> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4), *(it_ + i + 5) };
+}
+template<typename T>
+std::array<T &, 7> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4), *(it_ + i + 5), *(it_ + i + 6) };
+}
+template<typename T>
+std::array<T, 7> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4), *(it_ + i + 5), *(it_ + i + 6) };
+}
+template<typename T>
+std::array<T &, 8> operator[] (unsigned int i) {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4), *(it_ + i + 5), *(it_ + i + 6), *(it_ + i + 7) };
+}
+template<typename T>
+std::array<T, 8> operator[] (unsigned int i) const {
+	return std::array<T, 1>{ *(it_ + i), *(it_ + i + 1), *(it_ + i + 2), *(it_ + i + 3), *(it_ + i + 4), *(it_ + i + 5), *(it_ + i + 6), *(it_ + i + 7) };
+}
 
 #endif /* UTILSINTERLEAVEDITERATOR_H_ */
