@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <functional>
 
 #include "utf8.h"
 
@@ -10,6 +11,25 @@
 #include "id3/AudioID3Error.h"
 
 #include "utils/Buffer.h"
+#include "utils/InterleavedIterator.h"
+
+
+template<typename T> struct my_reference_wrapper {
+	my_reference_wrapper(T & ref) : 
+		ref_(ref) {
+	}
+
+	my_reference_wrapper & operator=(const T & v) {
+		ref_ = v;
+		return *this;
+	}
+
+	operator T & () {
+		return ref_;
+	}
+
+	T & ref_;
+};
 
 int main(int argc, char **argv) {
 
@@ -25,13 +45,11 @@ int main(int argc, char **argv) {
 	std::cout << "buffer2 capacity : " << buffer2.capacity()<< std::endl;
 	std::cout << "buffer2 size     : " << buffer2.size() << std::endl;
 
-	Buffer buffer3 = Buffer::interlace<uint32_t>(buffer1, buffer2);
+	std::array<Buffer, 2> a = {{ buffer1, buffer2 }};
 
-	for (auto it = buffer3.begin<uint32_t>(), end = buffer3.end<uint32_t>(); 
-			it != end; 
-			++it) {
-		std::cout << std::hex << *it << std::endl;
-	}
+	Buffer buffer3 = interlace<int16_t>(a);
+	
+	// std::cout << buffer3.size() << std::endl;
 
 	// if (argc < 2) {
 	// 	std::cerr << "Argument missing!" << std::endl;
@@ -60,10 +78,6 @@ int main(int argc, char **argv) {
 	// 	std::cerr << "I/O error!" << std::endl;
 	// 	return 1;
 	// }
-
-	std::pair<uint8_t, uint8_t> p;
-
-	std::cout << sizeof(p) << std::endl;
 
 	return 0;
 }

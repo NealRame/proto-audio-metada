@@ -74,7 +74,10 @@ public:
 		iterator (T *ptr) : ptr_(ptr) { }
 		iterator () : iterator(nullptr) { }
 		iterator(const iterator &it) : iterator(it.ptr_) { }
-		iterator & operator= (const iterator& it) { ptr_ = it.ptr_; }
+		iterator & operator= (const iterator& it) { 
+			ptr_ = it.ptr_; 
+			return *this;
+		}
 		bool operator<  (const iterator &it) const {
 			return ptr_ < it.ptr_;
 		}
@@ -94,13 +97,13 @@ public:
 			return ptr_ != it.ptr_;
 		}
 		template<typename IntegralType>
-		iterator operator+ (IntegralType i) {
+		iterator operator+ (IntegralType i) const {
 			iterator it(*this);
 			it += i;
 			return it;
 		}
 		template<typename IntegralType>
-		iterator operator- (IntegralType i) { 
+		iterator operator- (IntegralType i) const { 
 			return iterator(*this) -= i; 
 		}
 		template<typename IntegralType> 
@@ -125,9 +128,10 @@ public:
 			--(*this);
 			return it;
 		}
-		T & operator* () { return *static_cast<T *>(ptr_); }
-		T * operator-> () { return static_cast<T *>(ptr_); }
+		T & operator* () { return *ptr_; }
+		T * operator-> () { return ptr_; }
 		T & operator[] (unsigned int i) { return *(ptr_ + i); }
+		T operator* () const { return *ptr_; }
 		T operator[] (unsigned int i) const {
 			return (*const_cast<iterator<T> *>(this))[i];
 		}

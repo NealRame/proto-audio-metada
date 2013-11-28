@@ -2,11 +2,29 @@
 #define UTILSINTERLEAVEDITERATOR_H_
 
 #include <array>
+#include <functional>
+
 #include "Buffer.h"
+
+template<typename T>
+class type_ref_wrapper {
+public:
+	type_ref_wrapper(T &r) :
+		ref_(r) {
+	}
+	type_ref_wrapper & operator=(const T & v) {
+		ref_ = v;
+		return *this;
+	}
+	operator T &() { return ref_; }
+private:
+	T & ref_;
+};
 
 template<typename T, size_t N>
 class base_interleaved_iterator : 
-	std::iterator<std::random_access_iterator_tag, std::array<T &, N>> {
+	std::iterator<std::random_access_iterator_tag,
+			std::array<type_ref_wrapper<T>, N>> {
 
 protected:
 	typedef Buffer::iterator<T> iterator;
@@ -19,6 +37,7 @@ public:
 	}
 	virtual base_interleaved_iterator & operator= (const base_interleaved_iterator& it) {
 		it_ = it.it_;
+		return *this;
 	}
 	virtual bool operator<  (const base_interleaved_iterator &it) const {
 		return it_ < it.it_;
@@ -98,11 +117,15 @@ public:
 		it_ -= N*i;
 		return *this;
 	}
-	virtual base_interleaved_iterator & operator++ () { return *this += 1; }
-	virtual base_interleaved_iterator & operator-- () { return *this -= 1; }
-	virtual std::array<T &, N> operator* () = 0;
-	virtual std::array<const T &, N> operator* () const = 0;
-	virtual std::array<T &, N> operator[] (unsigned int i) = 0;
+	virtual base_interleaved_iterator & operator++ () {
+		return *this += 1;
+	}
+	virtual base_interleaved_iterator & operator-- () {
+		return *this -= 1;
+	}
+	virtual std::array<type_ref_wrapper<T>, N> operator* () = 0;
+	virtual std::array<type_ref_wrapper<T>, N> operator[] (unsigned int i) = 0;
+	virtual std::array<T, N> operator* () const = 0;
 	virtual std::array<T, N> operator[] (unsigned int i) const = 0;
 
 protected:
@@ -133,32 +156,32 @@ public:
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 1> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 1> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 1> operator* () {
-		return std::array<T, 1>{
+	virtual std::array<type_ref_wrapper<T>, 1> operator* () {
+		return std::array<type_ref_wrapper<T>, 1>{{
 			*(this->it_)
-		};
+		}};
 	}
-	virtual std::array<const T &, 1> operator* () const {
-		return std::array<T, 1>{
-			*(this->it_)
-		};
-	}
-	virtual std::array<T &, 1> operator[] (unsigned int i) {
-		return std::array<T, 1>{
+	virtual std::array<type_ref_wrapper<T>, 1> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 1>{{
 			*(this->it_ + i)
-		};
+		}};
 	}
 	virtual std::array<T, 1> operator[] (unsigned int i) const {
 		return std::array<T, 1>{
 			*(this->it_ + i)
+		};
+	}
+	virtual std::array<T, 1> operator* () const {
+		return std::array<T, 1>{
+			*(this->it_)
 		};
 	}
 };
@@ -172,48 +195,52 @@ public:
 	static interleaved_iterator end (Buffer &buffer) {
 		return begin(buffer) + buffer.count<T>()/2;
 	}
+private:
+	typedef Buffer::iterator<T> iterator;
+
 public:
+	interleaved_iterator (iterator it) { this->it_ = it; }
 	template<typename IntegralType>
-	interleaved_iterator operator+ (IntegralType i) {
+	interleaved_iterator operator+ (IntegralType i) const {
 		return (interleaved_iterator(*this) += i);
 	}
 	template<typename IntegralType>
-	interleaved_iterator operator- (IntegralType i) { 
+	interleaved_iterator operator- (IntegralType i) const { 
 		return (interleaved_iterator(*this) -= i);
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 2> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 2> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 2> operator* () {
-		return std::array<T, 2>{
+	virtual std::array<type_ref_wrapper<T>, 2> operator* () {
+		return std::array<type_ref_wrapper<T>, 2>{{
 			*(this->it_),
 			*(this->it_ + 1)
-		};
+		}};
 	}
-	virtual std::array<const T &, 2> operator* () const {
-		return std::array<T, 2>{
+	virtual std::array<type_ref_wrapper<T>, 2> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 2>{{
+			*(this->it_ + i),
+			*(this->it_ + i + 1)
+		}};
+	}
+	virtual std::array<T, 2> operator* () const {
+		return std::array<T, 2>{{
 			*(this->it_),
 			*(this->it_ + 1) 
-		};
-	}
-	virtual std::array<T &, 2> operator[] (unsigned int i) {
-		return std::array<T, 2>{
-			*(this->it_ + i),
-			*(this->it_ + i + 1)
-		};
+		}};
 	}
 	virtual std::array<T, 2> operator[] (unsigned int i) const {
-		return std::array<T, 2>{
+		return std::array<T, 2>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1)
-		};
+		}};
 	}
 };
 
@@ -237,41 +264,41 @@ public:
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 3> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 3> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 3> operator* () {
-		return std::array<T, 3>{
+	virtual std::array<type_ref_wrapper<T>, 3> operator* () {
+		return std::array<type_ref_wrapper<T>, 3>{{
 			*(this->it_),
 			*(this->it_ + 1),
 			*(this->it_ + 2)
-		};
+		}};
 	}
-	virtual std::array<const T &, 3> operator* () const {
-		return std::array<T, 3>{
-			*(this->it_),
-			*(this->it_ + 1),
-			*(this->it_ + 2)
-		};
-	}
-	virtual std::array<T &, 3> operator[] (unsigned int i) {
-		return std::array<T, 3>{
+	virtual std::array<type_ref_wrapper<T>, 3> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 3>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2)
-		};
+		}};
+	}
+	virtual std::array<T, 3> operator* () const {
+		return std::array<T, 3>{{
+			*(this->it_),
+			*(this->it_ + 1),
+			*(this->it_ + 2)
+		}};
 	}
 	virtual std::array<T, 3> operator[] (unsigned int i) const {
-		return std::array<T, 3>{
+		return std::array<T, 3>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2)
-		};
+		}};
 	}
 };
 
@@ -295,45 +322,45 @@ public:
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 4> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 4> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 4> operator* () {
-		return std::array<T, 4>{
+	virtual std::array<type_ref_wrapper<T>, 4> operator* () {
+		return std::array<type_ref_wrapper<T>, 4>{{
 			*(this->it_),
 			*(this->it_ + 1),
 			*(this->it_ + 2),
 			*(this->it_ + 3)
-		};
+		}};
 	}
-	virtual std::array<const T &, 4> operator* () const {
-		return std::array<T, 4>{
-			*(this->it_),
-			*(this->it_ + 1),
-			*(this->it_ + 2),
-			*(this->it_ + 3)
-		};
-	}
-	virtual std::array<T &, 4> operator[] (unsigned int i) {
-		return std::array<T, 4>{
+	virtual std::array<type_ref_wrapper<T>, 4> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 4>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
 			*(this->it_ + i + 3)
-		};
+		}};
+	}
+	virtual std::array<T, 4> operator* () const {
+		return std::array<T, 4>{{
+			*(this->it_),
+			*(this->it_ + 1),
+			*(this->it_ + 2),
+			*(this->it_ + 3)
+		}};
 	}
 	virtual std::array<T, 4> operator[] (unsigned int i) const {
-		return std::array<T, 4>{
+		return std::array<T, 4>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
 			*(this->it_ + i + 3)
-		};
+		}};
 	}
 };
 
@@ -357,49 +384,49 @@ public:
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 5> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 5> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 5> operator* () {
-		return std::array<T, 5>{
+	virtual std::array<type_ref_wrapper<T>, 5> operator* () {
+		return std::array<type_ref_wrapper<T>, 5>{{
 			*(this->it_),
 			*(this->it_ + 1),
 			*(this->it_ + 2),
 			*(this->it_ + 3),
 			*(this->it_ + 4)
-		};
+		}};
 	}
-	virtual std::array<const T &, 5> operator* () const {
-		return std::array<T, 5>{
-			*(this->it_),
-			*(this->it_ + 1),
-			*(this->it_ + 2),
-			*(this->it_ + 3),
-			*(this->it_ + 4)
-		};
-	}
-	virtual std::array<T &, 5> operator[] (unsigned int i) {
-		return std::array<T, 5>{
+	virtual std::array<type_ref_wrapper<T>, 5> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 5>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
 			*(this->it_ + i + 3),
 			*(this->it_ + i + 4)
-		};
+		}};
+	}
+	virtual std::array<T, 5> operator* () const {
+		return std::array<T, 5>{{
+			*(this->it_),
+			*(this->it_ + 1),
+			*(this->it_ + 2),
+			*(this->it_ + 3),
+			*(this->it_ + 4)
+		}};
 	}
 	virtual std::array<T, 5> operator[] (unsigned int i) const {
-		return std::array<T, 5>{
+		return std::array<T, 5>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
 			*(this->it_ + i + 3),
 			*(this->it_ + i + 4)
-		};
+		}};
 	}
 };
 
@@ -423,53 +450,53 @@ public:
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 6> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 6> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 6> operator* () {
-		return std::array<T, 6>{
+	virtual std::array<type_ref_wrapper<T>, 6> operator* () {
+		return std::array<type_ref_wrapper<T>, 6>{{
 			*(this->it_),
 			*(this->it_ + 1),
 			*(this->it_ + 2),
 			*(this->it_ + 3),
 			*(this->it_ + 4),
 			*(this->it_ + 5)
-		};
+		}};
 	}
-	virtual std::array<const T &, 6> operator* () const {
-		return std::array<T, 6>{
-			*(this->it_),
-			*(this->it_ + 1),
-			*(this->it_ + 2),
-			*(this->it_ + 3),
-			*(this->it_ + 4),
-			*(this->it_ + 5)
-		};
-	}
-	virtual std::array<T &, 6> operator[] (unsigned int i) {
-		return std::array<T, 6>{
+	virtual std::array<type_ref_wrapper<T>, 6> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 6>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
 			*(this->it_ + i + 3),
 			*(this->it_ + i + 4),
 			*(this->it_ + i + 5)
-		};
+		}};
+	}
+	virtual std::array<T, 6> operator* () const {
+		return std::array<T, 6>{{
+			*(this->it_),
+			*(this->it_ + 1),
+			*(this->it_ + 2),
+			*(this->it_ + 3),
+			*(this->it_ + 4),
+			*(this->it_ + 5)
+		}};
 	}
 	virtual std::array<T, 6> operator[] (unsigned int i) const {
-		return std::array<T, 6>{
+		return std::array<T, 6>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
 			*(this->it_ + i + 3),
 			*(this->it_ + i + 4),
 			*(this->it_ + i + 5)
-		};
+		}};
 	}
 };
 
@@ -493,16 +520,16 @@ public:
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 7> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 7> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 7> operator* () {
-		return std::array<T, 7>{
+	virtual std::array<type_ref_wrapper<T>, 7> operator* () {
+		return std::array<type_ref_wrapper<T>, 7>{{
 			*(this->it_),
 			*(this->it_ + 1),
 			*(this->it_ + 2),
@@ -510,21 +537,10 @@ public:
 			*(this->it_ + 4),
 			*(this->it_ + 5),
 			*(this->it_ + 6)
-		};
+		}};
 	}
-	virtual std::array<const T &, 7> operator* () const {
-		return std::array<T, 7>{
-			*(this->it_),
-			*(this->it_ + 1),
-			*(this->it_ + 2),
-			*(this->it_ + 3),
-			*(this->it_ + 4),
-			*(this->it_ + 5),
-			*(this->it_ + 6)
-		};
-	}
-	virtual std::array<T &, 7> operator[] (unsigned int i) {
-		return std::array<T, 7>{
+	virtual std::array<type_ref_wrapper<T>, 7> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 7>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
@@ -532,10 +548,21 @@ public:
 			*(this->it_ + i + 4),
 			*(this->it_ + i + 5),
 			*(this->it_ + i + 6)
-		};
+		}};
+	}
+	virtual std::array<T, 7> operator* () const {
+		return std::array<T, 7>{{
+			*(this->it_),
+			*(this->it_ + 1),
+			*(this->it_ + 2),
+			*(this->it_ + 3),
+			*(this->it_ + 4),
+			*(this->it_ + 5),
+			*(this->it_ + 6)
+		}};
 	}
 	virtual std::array<T, 7> operator[] (unsigned int i) const {
-		return std::array<T, 7>{
+		return std::array<T, 7>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
@@ -543,7 +570,7 @@ public:
 			*(this->it_ + i + 4),
 			*(this->it_ + i + 5),
 			*(this->it_ + i + 6)
-		};
+		}};
 	}
 };
 
@@ -567,16 +594,16 @@ public:
 	}
 	interleaved_iterator operator++ (int) {
 		interleaved_iterator it(*this);
-		++(*this);
+		++(static_cast<base_interleaved_iterator<T, 8> &>(*this));
 		return it;
 	}
 	interleaved_iterator operator-- (int) {
 		interleaved_iterator it(*this);
-		--(*this);
+		--(static_cast<base_interleaved_iterator<T, 8> &>(*this));
 		return it;
 	}
-	virtual std::array<T &, 8> operator* () {
-		return std::array<T, 8>{
+	virtual std::array<type_ref_wrapper<T>, 8> operator* () {
+		return std::array<type_ref_wrapper<T>, 8>{{
 			*(this->it_),
 			*(this->it_ + 1),
 			*(this->it_ + 2),
@@ -585,22 +612,10 @@ public:
 			*(this->it_ + 5),
 			*(this->it_ + 6),
 			*(this->it_ + 7)
-		};
+		}};
 	}
-	virtual std::array<const T &, 8> operator* () const {
-		return std::array<T, 8>{
-			*(this->it_),
-			*(this->it_ + 1),
-			*(this->it_ + 2),
-			*(this->it_ + 3),
-			*(this->it_ + 4),
-			*(this->it_ + 5),
-			*(this->it_ + 6),
-			*(this->it_ + 7)
-		};
-	}
-	virtual std::array<T &, 8> operator[] (unsigned int i) {
-		return std::array<T, 8>{
+	virtual std::array<type_ref_wrapper<T>, 8> operator[] (unsigned int i) {
+		return std::array<type_ref_wrapper<T>, 8>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
@@ -609,10 +624,22 @@ public:
 			*(this->it_ + i + 5),
 			*(this->it_ + i + 6),
 			*(this->it_ + i + 7)
-		};
+		}};
+	}
+	virtual std::array<T, 8> operator* () const {
+		return std::array<T, 8>{{
+			*(this->it_),
+			*(this->it_ + 1),
+			*(this->it_ + 2),
+			*(this->it_ + 3),
+			*(this->it_ + 4),
+			*(this->it_ + 5),
+			*(this->it_ + 6),
+			*(this->it_ + 7)
+		}};
 	}
 	virtual std::array<T, 8> operator[] (unsigned int i) const {
-		return std::array<T, 8>{
+		return std::array<T, 8>{{
 			*(this->it_ + i),
 			*(this->it_ + i + 1),
 			*(this->it_ + i + 2),
@@ -620,7 +647,8 @@ public:
 			*(this->it_ + i + 4),
 			*(this->it_ + i + 5),
 			*(this->it_ + i + 6),
-			*(this->it_ + i + 7) };
+			*(this->it_ + i + 7) 
+		}};
 	}
 };
 
@@ -637,15 +665,15 @@ Buffer interlace (const std::array<Buffer, N> &buffers) {
 	auto it = interleaved_iterator<T, N>::begin(buffer);
 
 	for (unsigned int i = 0; i < min_count; ++i) {
-		std::array<T &, N> frame = *it++;
+		std::array<type_ref_wrapper<T>, N> frame = *it++;
 
 		for (unsigned int j = 0; j < N; ++j) {
-			Buffer &channel = buffers[j];
+			const Buffer &channel = buffers[j];
 			frame.at(j) = *(channel.begin<T>() + i);
 		}
 	}
 
-	return Buffer();
+	return buffer;
 }
 
 #endif /* UTILSINTERLEAVEDITERATOR_H_ */
