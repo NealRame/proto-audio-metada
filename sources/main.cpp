@@ -33,23 +33,41 @@ template<typename T> struct my_reference_wrapper {
 
 int main(int argc, char **argv) {
 
-	char data1[] = { 0x42, 0x42, 0x42, 0x42 };
-	char data2[] = { 0x43, 0x43, 0x43, 0x43 };
+	char data1[] = { 0x42, 0x41, 0x42, 0x41 };
+	char data2[] = { 0x44, 0x43, 0x44, 0x43 };
+	char data3[] = { 0x46, 0x45, 0x46, 0x45 };
 
 	Buffer buffer1(data1, sizeof(data1));
 	Buffer buffer2(data2, sizeof(data2));
+	Buffer buffer3(data3, sizeof(data3));
 
-	std::cout << "buffer1 capacity : " << buffer1.capacity()<< std::endl;
-	std::cout << "buffer1 size     : " << buffer1.size() << std::endl;
-
-	std::cout << "buffer2 capacity : " << buffer2.capacity()<< std::endl;
-	std::cout << "buffer2 size     : " << buffer2.size() << std::endl;
-
-	std::array<Buffer, 2> a = {{ buffer1, buffer2 }};
-
-	Buffer buffer3 = interlace<int16_t>(a);
+	Buffer buffer4;
+	interlace<int16_t, 3>({{ buffer1, buffer2, buffer3 }}, buffer4);
 	
-	// std::cout << buffer3.size() << std::endl;
+	for (auto it = buffer4.begin<uint8_t>(), end = buffer4.end<uint8_t>();
+			it != end;
+			++it) {
+		std::cout 
+			<< std::setw(2) 
+			<< std::noshowbase
+			<< std::hex 
+			<< (unsigned int)*it << std::endl;
+	}
+
+	std::array<Buffer, 3> buffers;
+	deinterlace<uint16_t, 3>(buffer4, buffers);
+
+	for (unsigned int i = 0; i < 3; ++i) {
+		for (auto it = buffers[i].begin<uint8_t>(), 
+			end = buffers[i].end<uint8_t>(); it != end; ++it) {
+			std::cout 
+				<< std::setw(2)
+				<< std::noshowbase
+				<< std::hex 
+				<< (unsigned int ) *it << ", ";
+		}
+		std::cout << std::endl;
+	}
 
 	// if (argc < 2) {
 	// 	std::cerr << "Argument missing!" << std::endl;

@@ -44,6 +44,11 @@ public:
 	template <typename T> unsigned int count () const {
 		return size()/sizeof(T);
 	}
+	template <typename T>
+	void push_back(const T &value) {
+		*(reinterpret_cast<T *>((uint8_t *)data_ + size_)) = value;
+		size_ += sizeof(T);
+	}
 
 public:
 	size_t capacity () const { return capacity_; }
@@ -169,40 +174,6 @@ public:
 
 	template <typename T> std::reverse_iterator<iterator<const T>> rend () const {
 		return std::reverse_iterator<iterator<T>>(begin<const T>());
-	}
-
-public:
-	template<typename T>
-	static Buffer interlace (const Buffer &a, const Buffer &b) {
-		Buffer r = Buffer(2*sizeof(T)*(std::min(a.size(), b.size())/sizeof(T)));
-		
-		auto a_it = a.begin<T>(), a_end = a.end<T>();
-		auto b_it = b.begin<T>(), b_end = b.end<T>();
-		auto r_it = r.begin<T>();
-
-		while (a_it != a_end && b_it != b_end) {
-			*r_it++ = *a_it++;
-			*r_it++ = *b_it++;
-		}
-
-		return r;
-	}
-
-	template<typename T>
-	static std::pair<Buffer, Buffer> deinterlace (const Buffer &buffer) {
-		unsigned int count = buffer.count<T>()/2;
-		Buffer a(count*sizeof(T)), b(count*sizeof(T));
-
-		auto a_it = a.begin<T>(), b_it = b.begin<T>();
-
-		for (auto it = buffer.begin<T>(), end = it + 2*count;
-			it != end; 
-			it += 2) {
-			*a_it++ = *(it);
-			*b_it++ = *(it + 1);
-		}
-
-		return std::pair<Buffer, Buffer>(a, b);
 	}
 
 private:

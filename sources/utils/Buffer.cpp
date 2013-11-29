@@ -27,7 +27,8 @@ Buffer::Buffer (const void *data, size_t size, size_t capacity) {
 	}
 }
 
-Buffer::Buffer (const Buffer &buffer) {
+Buffer::Buffer (const Buffer &buffer) :
+	Buffer(0) {
 	*this  = buffer;
 }
 
