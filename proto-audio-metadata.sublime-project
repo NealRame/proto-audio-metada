@@ -13,6 +13,7 @@
 		"translate_tabs_to_spaces": false,
 		"sublimeclang_options": [
 			"-ferror-limit=0",
+		        "-I/Library/Developer/CommandLineTools/usr/lib/c++/v1/",
 			"-I/usr/include/x86_64-linux-gnu/c++/4.8",
 			"-I${project_path}/sources",
 			"-I${project_path}/vendors/utf8",

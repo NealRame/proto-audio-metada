@@ -1,8 +1,28 @@
+#if defined(__APPLE__)
+
+#include <cstdint>
+
+inline uint16_t bswap_16 (uint16_t v) {
+	return (v >> 8)
+		| (v << 8);
+}
+inline  int16_t bswap_16 (int16_t v) {
+	return (int16_t)bswap_16((uint16_t)v);
+}
+inline uint32_t bswap_32 (uint32_t v) {
+	return ((uint32_t)bswap_16((uint16_t)(v & 0x0000ffff)))
+		| ((uint32_t)bswap_16((uint16_t)(v >> 16)));
+}
+inline  int32_t bswap_32 (int32_t v) {
+	return (int32_t)bswap_32((uint32_t)v);
+}
+
+#else
 extern "C" {
 #	include <byteswap.h>
 }
-
 #include <cstdint>
+#endif
 
 #include <boost/detail/endian.hpp>
 
