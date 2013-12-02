@@ -13,25 +13,6 @@
 #include "utils/buffer.h"
 #include "utils/interleaved_iterator.h"
 
-template<typename T> struct my_reference_wrapper {
-	my_reference_wrapper(T & ref) : 
-		ref_(ref) {
-	}
-
-	my_reference_wrapper & operator=(const T & v) {
-		ref_ = v;
-		return *this;
-	}
-
-	operator T & () {
-		return ref_;
-	}
-
-	T & ref_;
-};
-
-
-
 int main(int argc, char **argv) {
 
 	using namespace com::nealrame;
