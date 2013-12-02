@@ -1,40 +1,49 @@
 #ifndef UTILSBUFFER_H_
 #define UTILSBUFFER_H_
 
-#include <algorithm>
 #include <cstdint>
+#include <exception> 
 #include <iterator>
 #include <string>
-#include <vector>
 
-class Buffer {
+namespace com {
+namespace nealrame {
+namespace utils {
+
+class buffer_ownership_error : public std::exception {
+	const char * what () const noexcept {
+		return "Attempting to change the capacity of a non-owner buffer";
+	}
+};
+
+class buffer {
 public:
 	template<typename T>
-	static Buffer createBuffer(unsigned int count) {
-		return Buffer(sizeof(T)*count); 
+	static buffer createBuffer(unsigned int count) {
+		return buffer(sizeof(T)*count); 
 	}
 	
 public:
-	explicit Buffer (size_t size = 0);
-	Buffer (size_t size, size_t capacity);
-	Buffer (const void *, size_t size);
-	Buffer (const void *, size_t size, size_t capacity);
-	Buffer (const Buffer &);
-	Buffer (Buffer &&);
-	virtual ~Buffer ();
+	explicit buffer (size_t size = 0);
+	buffer (size_t size, size_t capacity);
+	buffer (void *, size_t size, bool take_ownership);
+	buffer (void *, size_t size, size_t capacity, bool take_ownership);
+	buffer (const void *, size_t size);
+	buffer (const void *, size_t size, size_t capacity);
+	buffer (const buffer &);
+	buffer (buffer &&);
+	virtual ~buffer ();
 
 public:
-	Buffer & operator=(const Buffer &);
+	buffer & operator=(const buffer &);
 
 public:
-	void append (const Buffer &);
-	void append (const std::string &);
-	void append (const void *, size_t);
-	void assign (const void *, size_t);
-	uint8_t & at (size_t);
-	uint8_t at (size_t) const;
-	uint8_t & operator[] (size_t pos) { return this->at(pos); }
-	uint8_t operator[] (size_t pos) const { return this->at(pos); }
+	void append (const buffer &) throw(buffer_ownership_error);
+	void append (const std::string &) throw(buffer_ownership_error);
+	void append (const void *data, size_t len) throw(buffer_ownership_error);
+	void assign (void *, size_t, bool take_ownership);
+	void copy (const void *data, size_t len, size_t offset) throw(buffer_ownership_error);
+
 	void clear ();
 	void * data () { return data_; }
 	const void * data () const { return data_; }
@@ -57,20 +66,20 @@ public:
 	 * If c is smaller than the buffer current size then elements beyond
 	 * c will be lost.
 	 */
-	void reserve (size_t c);
+	void reserve (size_t c) throw(buffer_ownership_error);
 	/**
 	 * Increase current capacity by specified value.
 	 * `b.extend(c)` is equivalent to calling `b.reserve(b.capacity()+c)`
 	 */
-	void extend (size_t c);
+	void extend (size_t c) throw(buffer_ownership_error);
 	/**
 	 * Decrease current capacity by specified value.
 	 * `b.shrink(c)` is equivalent to calling `b.reserve(b.capacity()-c)`
 	 */
-	void shrink (size_t c);
+	void shrink (size_t c) throw(buffer_ownership_error);
 
 public:
-	void swap (Buffer &);
+	void swap (buffer &);
 
 public:
 	template <typename T> 
@@ -179,7 +188,12 @@ public:
 private:
 	size_t size_;
 	size_t capacity_;
+	bool own_;
 	void *data_;
 };
+
+} // namespace utils
+} // namespace nealrame
+} // namespace com
 
 #endif /* UTILSBUFFER_H_ */

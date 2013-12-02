@@ -10,9 +10,8 @@
 #include "id3/AudioID3Tag.h"
 #include "id3/AudioID3Error.h"
 
-#include "utils/Buffer.h"
-#include "utils/InterleavedIterator.h"
-
+#include "utils/buffer.h"
+#include "utils/interleaved_iterator.h"
 
 template<typename T> struct my_reference_wrapper {
 	my_reference_wrapper(T & ref) : 
@@ -31,39 +30,45 @@ template<typename T> struct my_reference_wrapper {
 	T & ref_;
 };
 
+
+
 int main(int argc, char **argv) {
+
+	using namespace com::nealrame;
 
 	char data1[] = { 0x42, 0x41, 0x42, 0x41 };
 	char data2[] = { 0x44, 0x43, 0x44, 0x43 };
 	char data3[] = { 0x46, 0x45, 0x46, 0x45 };
 
-	Buffer buffer1(data1, sizeof(data1));
-	Buffer buffer2(data2, sizeof(data2));
-	Buffer buffer3(data3, sizeof(data3));
+	utils::buffer buf1(data1, sizeof(data1), false);
+	utils::buffer buf2(data2, sizeof(data2), false);
+	utils::buffer buf3(data3, sizeof(data3), false);
 
-	Buffer buffer4;
-	interlace<int16_t, 3>({{ buffer1, buffer2, buffer3 }}, buffer4);
+	utils::buffer buf(const_cast<const void *>((void *)data1), sizeof(data1));
+
+	utils::buffer buf4;
+	utils::interlace<int16_t, 3>({{ buf1, buf2, buf3 }}, buf4);
 	
-	for (auto it = buffer4.begin<uint8_t>(), end = buffer4.end<uint8_t>();
+	for (auto it = buf4.begin<uint8_t>(), end = buf4.end<uint8_t>();
 			it != end;
 			++it) {
-		std::cout 
-			<< std::setw(2) 
+		std::cout
+			<< std::setw(2)
 			<< std::noshowbase
-			<< std::hex 
+			<< std::hex
 			<< (unsigned int)*it << std::endl;
 	}
 
-	std::array<Buffer, 3> buffers;
-	deinterlace<uint16_t, 3>(buffer4, buffers);
+	std::array<utils::buffer, 3> bufs;
+	utils::deinterlace<uint16_t, 3>(buf4, bufs);
 
 	for (unsigned int i = 0; i < 3; ++i) {
-		for (auto it = buffers[i].begin<uint8_t>(), 
-			end = buffers[i].end<uint8_t>(); it != end; ++it) {
-			std::cout 
+		for (auto it = bufs[i].begin<uint8_t>(),
+			end = bufs[i].end<uint8_t>(); it != end; ++it) {
+			std::cout
 				<< std::setw(2)
 				<< std::noshowbase
-				<< std::hex 
+				<< std::hex
 				<< (unsigned int ) *it << ", ";
 		}
 		std::cout << std::endl;
