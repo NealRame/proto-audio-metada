@@ -5,8 +5,9 @@
 #include <array>
 #include <functional>
 #include <limits>
-
-#include "buffer.h"
+#include <iostream>
+#include <iomanip>
+#include "abstract_buffer.h"
 
 namespace com {
 namespace nealrame {
@@ -32,7 +33,7 @@ class base_interleaved_iterator :
 	std::iterator<std::random_access_iterator_tag,
 			std::array<std::reference_wrapper<T>, N>> {
 protected:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 public:
 	base_interleaved_iterator (iterator it) : it_(it) { }
 	base_interleaved_iterator () : base_interleaved_iterator(iterator()) { }
@@ -138,13 +139,13 @@ class interleaved_iterator : public base_interleaved_iterator<T, N> {
 template<typename T>
 class interleaved_iterator<T, 1> : public base_interleaved_iterator<T, 1> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>();
 	}
 public:
@@ -193,13 +194,13 @@ public:
 template<typename T>
 class interleaved_iterator<T, 2> : public base_interleaved_iterator<T, 2> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>()/2;
 	}
 public:
@@ -252,19 +253,19 @@ public:
 template<typename T>
 class interleaved_iterator<T, 3> : public base_interleaved_iterator<T, 3> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>()/3;
 	}
-	static interleaved_iterator begin (const buffer &buf) {
+	static interleaved_iterator begin (const abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (const buffer &buf) {
+	static interleaved_iterator end (const abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>();
 	}
 public:
@@ -321,13 +322,13 @@ public:
 template<typename T>
 class interleaved_iterator<T, 4> : public base_interleaved_iterator<T, 4> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>()/4;
 	}
 public:
@@ -388,13 +389,13 @@ public:
 template<typename T>
 class interleaved_iterator<T, 5> : public base_interleaved_iterator<T, 5> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>()/5;
 	}
 public:
@@ -459,13 +460,13 @@ public:
 template<typename T>
 class interleaved_iterator<T, 6> : public base_interleaved_iterator<T, 6> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>()/6;
 	}
 public:
@@ -534,13 +535,13 @@ public:
 template<typename T>
 class interleaved_iterator<T, 7> : public base_interleaved_iterator<T, 7> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>()/7;
 	}
 public:
@@ -613,13 +614,13 @@ public:
 template<typename T>
 class interleaved_iterator<T, 8> : public base_interleaved_iterator<T, 8> {
 private:
-	typedef buffer::iterator<T> iterator;
+	typedef abstract_buffer::iterator<T> iterator;
 	interleaved_iterator (iterator it) { this->it_ = it; }
 public:
-	static interleaved_iterator begin (buffer &buf) {
+	static interleaved_iterator begin (abstract_buffer &buf) {
 		return interleaved_iterator(buf.begin<T>());
 	}
-	static interleaved_iterator end (buffer &buf) {
+	static interleaved_iterator end (abstract_buffer &buf) {
 		return begin(buf) + buf.count<T>()/8;
 	}
 public:
@@ -694,49 +695,44 @@ public:
 };
 
 template<typename T, size_t N>
-void interlace (const std::array<std::reference_wrapper<const buffer>, N> &bufs, buffer &buf) {
-	unsigned int min_count = std::numeric_limits<unsigned int>::max();
+void interlace (std::array<std::reference_wrapper<const abstract_buffer>, N> bufs, abstract_buffer &buf) {
+	size_t min_count = std::numeric_limits<unsigned int>::max();
+	size_t size = buf.length();
 
 	std::for_each(bufs.begin(), bufs.end(),
-		[&min_count](const buffer &buf) {
+		[&min_count](const abstract_buffer &buf) {
 			min_count = std::min(buf.count<T>(), min_count);
 		});
 
-	size_t size = min_count*N*sizeof(T);
-
-	if (size > buf.capacity()) {
-		buf.extend(size);
+	while (min_count*N*sizeof(T) > size) {
+		min_count--;
 	}
-	buf.clear();
 
 	auto it = interleaved_iterator<T, N>::begin(buf);
 
-	for (unsigned int i = 0; i < min_count; ++i, ++it) {
+	for (unsigned int i = 0; i < min_count; ++i) {
 		for (unsigned int j = 0; j < N; ++j) {
-			const buffer &channel = bufs[j];
-			buf.push_back(*(channel.begin<T>() + i));
+			const abstract_buffer &channel = bufs[j];
+			it[i][j].get() = *(channel.begin<T>() + i);
 		}
 	}
 }
 
 template<typename T, size_t N>
-void deinterlace(const buffer &buf, std::array<buffer, N> &bufs) {
-	unsigned int count = buf.count<T>()/N;
-	size_t size = sizeof(T)*count;
+void deinterlace(const abstract_buffer &buf, std::array<std::reference_wrapper<abstract_buffer>, N> bufs) {
+	size_t min_count = std::numeric_limits<size_t>::max();
 
-	std::for_each(bufs.begin(), bufs.end(), [size](buffer &buf) {
-		if (size > buf.capacity()) {
-			buf.extend(size);
-		}
-		buf.clear();
+	std::for_each(bufs.begin(), bufs.end(), [&min_count](abstract_buffer &buf) {
+		min_count = std::min(min_count, buf.count<T>());
 	});
 
 	auto it = interleaved_iterator<const T, N>::begin(buf);
-
+	unsigned int count = std::min(min_count, buf.count<T>()/N);
+	
 	for (unsigned int i = 0; i < count; ++i) {
 		for (unsigned int j = 0; j < N; ++j) {
-			T value = it[i][j].get();
-			bufs[j].push_back(value);
+			abstract_buffer & dest = bufs[j].get();
+			dest.begin<T>()[i] = it[i][j].get();
 		}
 	}
 }

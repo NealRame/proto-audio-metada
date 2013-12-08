@@ -1,145 +1,130 @@
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 
 #include "mutable_buffer.h"
+#include <iostream>
 
 using namespace com::nealrame::utils;
 
-buffer::buffer (size_t size) :
-	buffer(nullptr, size, size, true) {
+mutable_buffer::mutable_buffer (size_t length, size_t capacity) {
+	// std::cout << "mutable_buffer (size_t length, size_t capacity)" << std::endl;
+	length_ = length;
+	capacity_ = std::max(length_, capacity);
+	data_ = capacity_ > 0 ? malloc(capacity_) : nullptr;
 }
 
-buffer::buffer (size_t size, size_t capacity) :
-	buffer(nullptr, size, capacity, true) {
+mutable_buffer::mutable_buffer (size_t length) :
+	mutable_buffer(length, length) {
+	// std::cout << "mutable_buffer (size_t length)" << std::endl;
 }
 
-buffer::buffer (void *data, size_t size, bool take_ownership) :
-	buffer(data, size, size, take_ownership) {
+mutable_buffer::mutable_buffer () :
+	mutable_buffer(static_cast<size_t>(0), static_cast<size_t>(0)) {
+	// std::cout << "mutable_buffer ()" << std::endl;
 }
 
-buffer::buffer (void *data, size_t size, size_t capacity, bool take_ownership) {
-	if (take_ownership) {
-		capacity_ = std::max(size, capacity);
-		data_ = capacity_ > 0 ? realloc(data, capacity_) :  nullptr;
-	} else {
-		capacity_ = size_;
-		data_ = data;
-	}
-	own_ = take_ownership;
-	size_ = size;
+mutable_buffer::mutable_buffer (const void *data, size_t length, size_t capacity) :
+	mutable_buffer(length, capacity) {
+	// std::cout << "mutable_buffer (const void *data, size_t length, size_t capacity)" << std::endl;
+	memcpy(data_, data, length_);
 }
 
-buffer::buffer (const void *data, size_t size) :
-	buffer(data, size, size) {
+mutable_buffer::mutable_buffer (const void *data, size_t length) :
+	mutable_buffer(data, length, length) {
+	// std::cout << "mutable_buffer (const void *data, size_t length)" << std::endl;
 }
 
-buffer::buffer (const void *data, size_t size, size_t capacity) {
-	own_ = true;
-	size_ = size;
-	capacity_ = std::max(size_, capacity_);
-	data_ = capacity_ > 0  ? malloc(capacity_) : nullptr;
-	memcpy(data_, data, size);
+mutable_buffer::mutable_buffer (const abstract_buffer &other) :
+	mutable_buffer(other.data(), other.length()) {
+	// std::cout << "mutable_buffer::mutable_buffer (const abstract_buffer &other)" << std::endl;
 }
 
-buffer::buffer (const buffer &other) :
-	buffer((const void *)other.data_, other.size_, other.capacity_) {
-	*this  = other;
+mutable_buffer::mutable_buffer (const mutable_buffer &other) :
+	mutable_buffer(other.data(), other.length(), other.capacity()) {
 }
 
-buffer::buffer (buffer &&buffer) {
-	own_ = buffer.own_;
-	size_ = buffer.size_;
+mutable_buffer::mutable_buffer (mutable_buffer &&buffer) {
+	length_ = buffer.length_;
 	capacity_ = buffer.capacity_;
 	data_ = buffer.data_;
-	buffer.size_ = buffer.capacity_ = 0;
+	buffer.length_ = buffer.capacity_ = 0;
 	buffer.data_ = nullptr;
 }
 
-buffer::~buffer () {
-	if (own_ && data_ != nullptr) {
+mutable_buffer::~mutable_buffer () {
+	if (data_) {
 		free(data_);
 	}
 }
 
-buffer & buffer::operator=(const buffer &buffer) {
-	if (! own_) {
-		data_ = nullptr;
-		own_ = true;
-	}
-
-	size_ = buffer.size_;
-	reserve(buffer.capacity_);
-
+mutable_buffer & mutable_buffer::operator=(const abstract_buffer &other) {
+	// std::cout << "mutable_buffer & mutable_buffer::operator=(const abstract_buffer &other)" << std::endl;
+	length_ = other.length();
+	reserve(length_);
 	if (data_ != nullptr) {
-		memcpy(data_, buffer.data_, size_);
+		memcpy(data_, other.data(), length_);
 	}
-
 	return *this;
 }
 
-void buffer::assign (void *data, size_t length, bool take_ownership) {
-	if (own_) {
-		free(data_);
+mutable_buffer & mutable_buffer::operator=(const mutable_buffer &other) {
+	// std::cout << "mutable_buffer & mutable_buffer::operator=(const mutable_buffer &other)" << std::endl;
+	length_ = other.length_;
+	reserve(other.capacity_);
+	if (data_ != nullptr) {
+		memcpy(data_, other.data_, length_);
 	}
-	capacity_ = size_ = length;
-	data_ = data;
-	own_ = take_ownership;
+	return *this;
 }
 
-void buffer::copy (const void *data, size_t length, size_t offset)
-	throw (buffer_ownership_error) {
+void mutable_buffer::copy (const void *data, size_t length, size_t offset) {
 	if ((offset + length) > capacity_) {
-		extend((offset + length) - capacity_);
+		enlarge((offset + length) - capacity_);
 	}
 	memcpy(static_cast<uint8_t *>(data_) + offset, data, length);
-	size_ = std::max(size_, offset + length);
+	length_ = std::max(length_, offset + length);
 }
 
-void buffer::append (const void *data, size_t length)
-	throw (buffer_ownership_error) {
-	copy(data, length, size_);
-}
-
-void buffer::append (const buffer &buffer)
-	throw (buffer_ownership_error) {
-	copy(buffer.data_, buffer.size_, size_);
-}
-
-void buffer::append (const std::string &s)
-	throw (buffer_ownership_error) {
-	copy(s.c_str(), s.length() + 1, size_);
-}
-
-void buffer::clear () {
-	size_ = 0;
-}
-
-void buffer::fill (uint8_t value) {
-	memset(data_, value, size_);
-}
-
-void buffer::reserve (size_t c) 
-	throw(buffer_ownership_error) {
-	if (! own_) {
-		throw buffer_ownership_error();
+void mutable_buffer::fill (uint8_t value, size_t count, size_t offset) {
+	if ((offset + count) > capacity_) {
+		enlarge((offset + count) - capacity_);
 	}
-	data_ = realloc(data_, c);
-	capacity_ = c;
+	memset(static_cast<uint8_t *>(data_) + offset, value, count);
+	length_ = std::max(length_, offset + count);
 }
 
-void buffer::extend (size_t c) 
-	throw(buffer_ownership_error) {
+void mutable_buffer::append (const void *data, size_t length) {
+	copy(data, length, length_);
+}
+
+void mutable_buffer::append (const abstract_buffer &buf) {
+	copy(buf.data(), buf.length(), length_);
+}
+
+void mutable_buffer::append (const std::string &s) {
+	copy(s.c_str(), s.length() + 1, length_);
+}
+
+void mutable_buffer::reserve (size_t c) {
+	capacity_ = c;
+	length_ = std::min(length_, capacity_);
+	data_ = realloc(data_, capacity_);
+	if (capacity_ == 0) {
+		data_ = nullptr;
+	}
+}
+
+void mutable_buffer::enlarge (size_t c) {
 	reserve(capacity_ + c);
 }
 
-void buffer::shrink (size_t c) 
-	throw(buffer_ownership_error) {
+void mutable_buffer::shrink (size_t c) {
 	reserve(capacity_ < c ? 0 : capacity_ - c);
 }
 
-void buffer::swap (buffer &buffer) {
+void mutable_buffer::swap (mutable_buffer &buffer) {
 	std::swap(capacity_, buffer.capacity_);
 	std::swap(data_, buffer.data_);
-	std::swap(own_, buffer.own_);
-	std::swap(size_, buffer.size_);
+	std::swap(length_, buffer.length_);
 }

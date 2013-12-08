@@ -1,8 +1,8 @@
-#ifndef UTILS_BASE_BUFFER_H_
-#define UTILS_BASE_BUFFER_H_
+#ifndef UTILS_ABSTRACTBUFFER_H_
+#define UTILS_ABSTRACTBUFFER_H_
 
 #include <cstdint>
-#include <exception> 
+#include <cstring>
 #include <iterator>
 #include <string>
 
@@ -10,27 +10,33 @@ namespace com {
 namespace nealrame {
 namespace utils {
 
-class base_buffer {
+class abstract_buffer {
+protected:
+	size_t length_;
+	void *data_;
+	
 public:
-	virtual void assign (void *, size_t) = 0;
-	void clear ();
 	virtual void copy (const void *data, size_t len, size_t offset) = 0;
+	virtual void fill (uint8_t value, size_t count, size_t offset) = 0;
 	const void * data () const { return data_; }
-	bool empty () const { return size_ == 0; }
-	size_t size () const { return size_; }
-	template <typename T> unsigned int count () const {
-		return size()/sizeof(T);
+	void * data () { return data_; }
+	size_t length () const { return length_; }
+
+public:
+	template <typename T>
+	size_t count() const {
+		return length_/sizeof(T);
 	}
 
 public:
-	template <typename T> 
+	template <typename T>
 	class iterator : std::iterator<std::random_access_iterator_tag, T> {
 	public:
 		iterator (T *ptr) : ptr_(ptr) { }
 		iterator () : iterator(nullptr) { }
 		iterator (const iterator &it) : iterator(it.ptr_) { }
-		iterator & operator= (const iterator& it) { 
-			ptr_ = it.ptr_; 
+		iterator & operator= (const iterator& it) {
+			ptr_ = it.ptr_;
 			return *this;
 		}
 		bool operator<  (const iterator &it) const {
@@ -58,10 +64,10 @@ public:
 			return it;
 		}
 		template<typename IntegralType>
-		iterator operator- (IntegralType i) const { 
-			return iterator(*this) -= i; 
+		iterator operator- (IntegralType i) const {
+			return iterator(*this) -= i;
 		}
-		template<typename IntegralType> 
+		template<typename IntegralType>
 		iterator & operator+= (IntegralType i) {
 			ptr_ += i;
 			return *this;
@@ -125,10 +131,6 @@ public:
 	template <typename T> std::reverse_iterator<iterator<const T>> rend () const {
 		return std::reverse_iterator<iterator<T>>(begin<const T>());
 	}
-
-protected:
-	size_t size_;
-	void *data_;
 };
 
 } // namespace utils
