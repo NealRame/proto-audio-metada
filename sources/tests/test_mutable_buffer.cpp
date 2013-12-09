@@ -247,18 +247,59 @@ TEST_F(mutableBufferTest, CopyWithOffset) {
 	EXPECT_EQ(0, memcmp(static_cast<uint8_t *>(buf5_.data()) + capacity, mutable_buffer_test_data, sizeof(mutable_buffer_test_data)));
 }
 
-// TEST_F(mutableBufferTest, OutOfBoundCopy) {
-// 	FAIL();
-// }
+TEST_F(mutableBufferTest, Fill) {
+	uint8_t data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	// Fill an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.fill(0, sizeof(data), 0);
+	EXPECT_EQ(sizeof(data), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(0, memcmp(buf1_.data(), data, sizeof(data)));
 
-// TEST_F(mutableBufferTest, Fill) {
-// 	FAIL();
-// }
+	// Fill a pre-filled buffer
+	EXPECT_EQ(0, buf5_.length());
+	EXPECT_EQ(capacity, buf5_.capacity());
+	buf5_.fill(0, sizeof(data), 0);
+	EXPECT_LE(sizeof(data), buf5_.length());
+	EXPECT_LE(buf5_.length(), buf5_.capacity());
+	EXPECT_EQ(0, memcmp(buf5_.data(), data, sizeof(data)));
+}
 
-// TEST(mutableBuffer, BoundFill) {
-// 	FAIL();
-// }
+TEST_F(mutableBufferTest, FillWithOffset) {
+	uint8_t data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	size_t offset = 4;
+	
+	// Fill an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.fill(0, sizeof(data), offset);
+	EXPECT_EQ(offset + sizeof(data), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(0, memcmp(static_cast<uint8_t *>(buf1_.data()) + offset, data, sizeof(data)));
 
-// TEST(mutableBuffer, OutOfBoundFill) {
-// 	FAIL();
-// }
+	// Fill a pre-filled buffer
+	EXPECT_EQ(0, buf5_.length());
+	EXPECT_EQ(capacity, buf5_.capacity());
+	buf5_.fill(0, sizeof(data), offset);
+	EXPECT_LE(offset + sizeof(data), buf5_.length());
+	EXPECT_LE(buf5_.length(), buf5_.capacity());
+	EXPECT_EQ(0, memcmp(static_cast<uint8_t *>(buf5_.data()) + offset, data, sizeof(data)));
+}
+
+TEST_F(mutableBufferTest, AppendData) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, AppendString) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, AppendBuffer) {
+	FAIL();	
+}
