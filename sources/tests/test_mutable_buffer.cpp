@@ -2,6 +2,7 @@
 #include "../utils/buffer.h"
 #include "../utils/mutable_buffer.h"
 
+#include <cstring>
 #include <memory>
 
 using namespace com::nealrame;
@@ -293,13 +294,102 @@ TEST_F(mutableBufferTest, FillWithOffset) {
 }
 
 TEST_F(mutableBufferTest, AppendData) {
-	FAIL();
+	uint8_t data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.append(data, sizeof(data));
+	EXPECT_EQ(sizeof(data), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(0, memcmp(buf1_.data(), data, buf1_.length()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.append(data, sizeof(data));
+	EXPECT_EQ(l + sizeof(data), buf2_.length());
+	EXPECT_LE(buf1_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(0, memcmp(static_cast<uint8_t *>(buf2_.data()) + l, data, sizeof(data)));
 }
 
 TEST_F(mutableBufferTest, AppendString) {
-	FAIL();
+	std::string str = mutable_buffer_test_data;
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.append(str);
+	EXPECT_EQ(str.length() + 1, buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(0, strcmp(static_cast<const char *>(buf1_.data()), str.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.append(str);
+	EXPECT_EQ(l + str.length() + 1, buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(0, strcmp(static_cast<const char *>(buf2_.data()) + l, str.data()));
 }
 
 TEST_F(mutableBufferTest, AppendBuffer) {
-	FAIL();	
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.append(buf_);
+	EXPECT_EQ(buf_.length(), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(0, memcmp(buf1_.data(), buf_.data(), buf1_.length()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.append(buf_);
+	EXPECT_EQ(l + buf_.length(), buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(0, memcmp(static_cast<const char *>(buf2_.data()) + l, buf_.data(), buf_.length()));
+}
+
+TEST_F(mutableBufferTest, PushBackInt8) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, PushBackInt16) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, PushBackInt32) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, PushBackInt64) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, PushBackFloat) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, PushBackDouble) {
+	FAIL();
+}
+
+TEST_F(mutableBufferTest, PushBackPOD) {
+	FAIL();
 }
