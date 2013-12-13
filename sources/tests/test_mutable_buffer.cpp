@@ -367,11 +367,53 @@ TEST_F(mutableBufferTest, AppendBuffer) {
 }
 
 TEST_F(mutableBufferTest, PushBackInt8) {
-	FAIL();
+	uint8_t v = 0xde;
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.push_back(v);
+	EXPECT_EQ(1, buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(v, *static_cast<uint8_t *>(buf1_.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.push_back(v);
+	EXPECT_EQ(l + 1, buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(v, *(static_cast<uint8_t *>(buf2_.data()) + l));
 }
 
 TEST_F(mutableBufferTest, PushBackInt16) {
-	FAIL();
+	uint16_t v = 0xdead;
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.push_back(v);
+	EXPECT_EQ(2, buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(v, *static_cast<uint16_t *>(buf1_.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.push_back(v);
+	EXPECT_EQ(l + 2, buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(v, *(reinterpret_cast<uint16_t *>(static_cast<uint8_t *>(buf2_.data()) + l)));
 }
 
 TEST_F(mutableBufferTest, PushBackInt32) {

@@ -45,6 +45,9 @@ public:
 
 	template <typename T>
 	void push_back(const T &value) {
+		if (! (length_ < capacity_)) {
+			enlarge(sizeof(T));
+		}
 		*(reinterpret_cast<T *>((uint8_t *)data_ + length_)) = value;
 		length_ += sizeof(T);
 	}
