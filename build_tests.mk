@@ -10,7 +10,11 @@ VPATH        := $(VPATH):$(CURDIR)/sources/id3
 VPATH        := $(VPATH):$(CURDIR)/sources/metadata
 VPATH        := $(VPATH):$(CURDIR)/sources/utils
 
-INCLUDE_PATH  = -isystem $(CURDIR)/vendors/gtest/include -I$(CURDIR)/vendors/gtest
+
+INCLUDE_PATH  = -isystem $(CURDIR)/vendors/gtest/include 
+INCLUDE_PATH += -I$(CURDIR)/vendors/gtest
+INCLUDE_PATH += -isystem $(CURDIR)/vendors/gmock/include
+INCLUDE_PATH += -I$(CURDIR)/vendors/gmock
 
 CFLAGS       += $(INCLUDE_PATH)
 CXXFLAGS     += $(INCLUDE_PATH)
