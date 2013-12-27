@@ -39,10 +39,6 @@ public:
 
 	void clear () { length_ = 0; }
 
-	template <typename T> unsigned int count () const {
-		return length()/sizeof(T);
-	}
-
 	template <typename T>
 	void push_back(const T &value) {
 		if (! (length_ < capacity_)) {

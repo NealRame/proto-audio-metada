@@ -18,8 +18,8 @@ protected:
 public:
 	virtual void copy (const void *data, size_t len, size_t offset) = 0;
 	virtual void fill (uint8_t value, size_t count, size_t offset) = 0;
-	const void * data () const { return data_; }
-	void * data () { return data_; }
+	const void * data () const { return length_ > 0 ? data_ : nullptr; }
+	void * data () { return length_ > 0 ? data_ : nullptr; }
 	size_t length () const { return length_; }
 
 public:
