@@ -81,7 +81,6 @@ TEST_F(mutableBufferTest, LengthAndLowerCapacityConstructor) {
 }
 
 TEST_F(mutableBufferTest, EmptyWithCapacityConstructor) {
-	EXPECT_NE(nullptr, buf5_.data());
 	EXPECT_EQ(capacity, buf5_.capacity());
 	EXPECT_EQ(0, buf5_.length());
 }
@@ -134,18 +133,25 @@ TEST_F(mutableBufferTest, MutableBufferCopyConstructor) {
 	EXPECT_EQ(0, memcmp(buf11_.data(), buf10_.data(), buf11_.length()));
 }
 
+TEST_F(mutableBufferTest, Count) {
+	EXPECT_EQ(sizeof(mutable_buffer_test_data)/sizeof(uint64_t), buf6_.count<uint64_t>());
+	EXPECT_EQ(sizeof(mutable_buffer_test_data)/sizeof(uint32_t), buf6_.count<uint32_t>());
+	EXPECT_EQ(sizeof(mutable_buffer_test_data)/sizeof(uint16_t), buf6_.count<uint16_t>());
+	EXPECT_EQ(sizeof(mutable_buffer_test_data)/sizeof( uint8_t), buf6_.count< uint8_t>());
+	EXPECT_EQ(sizeof(mutable_buffer_test_data)/sizeof(   float), buf6_.count<   float>());
+	EXPECT_EQ(sizeof(mutable_buffer_test_data)/sizeof(  double), buf6_.count<  double>());
+}
+
 TEST_F(mutableBufferTest, Reserve) {
 	buf1_.reserve(capacity);
-	EXPECT_NE(nullptr, buf1_.data());
 	EXPECT_EQ(0, buf1_.length());
 	EXPECT_EQ(capacity, buf1_.capacity());
 }
 
 TEST_F(mutableBufferTest, Enlarge) {
 	// enlarge an empty buffer
-	EXPECT_EQ(nullptr, buf1_.data());
+	EXPECT_EQ(0, buf1_.length());
 	buf1_.enlarge(capacity);
-	EXPECT_NE(nullptr, buf1_.data());
 	EXPECT_EQ(0, buf1_.length());
 	EXPECT_EQ(capacity, buf1_.capacity());
 	// enlarge a filled buffer
@@ -205,7 +211,7 @@ TEST_F(mutableBufferTest, Clear) {
 	EXPECT_NE(nullptr, buf2_.data());
 	buf2_.clear();
 	EXPECT_EQ(0, buf2_.length());	
-	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(nullptr, buf2_.data());
 }
 
 TEST_F(mutableBufferTest, Copy) {
@@ -399,7 +405,7 @@ TEST_F(mutableBufferTest, PushBackInt16) {
 	EXPECT_EQ(0, buf1_.capacity());
 	EXPECT_EQ(nullptr, buf1_.data());
 	buf1_.push_back(v);
-	EXPECT_EQ(2, buf1_.length());
+	EXPECT_EQ(sizeof(v), buf1_.length());
 	EXPECT_LE(buf1_.length(), buf1_.capacity());
 	EXPECT_NE(nullptr, buf1_.data());
 	EXPECT_EQ(v, *static_cast<uint16_t *>(buf1_.data()));
@@ -417,21 +423,141 @@ TEST_F(mutableBufferTest, PushBackInt16) {
 }
 
 TEST_F(mutableBufferTest, PushBackInt32) {
-	FAIL();
+	uint32_t v = 0xdeadbeef;
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.push_back(v);
+	EXPECT_EQ(sizeof(v), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(v, *static_cast<uint32_t *>(buf1_.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.push_back(v);
+	EXPECT_EQ(l + sizeof(v), buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(v, *(reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(buf2_.data()) + l)));
 }
 
 TEST_F(mutableBufferTest, PushBackInt64) {
-	FAIL();
+	uint64_t v = 0xdecafeddeadbeef;
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.push_back(v);
+	EXPECT_EQ(sizeof(v), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(v, *static_cast<uint64_t *>(buf1_.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.push_back(v);
+	EXPECT_EQ(l + sizeof(v), buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(v, *(reinterpret_cast<uint64_t *>(static_cast<uint8_t *>(buf2_.data()) + l)));
 }
 
 TEST_F(mutableBufferTest, PushBackFloat) {
-	FAIL();
+	float v = 3.141592653589793;
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.push_back(v);
+	EXPECT_EQ(sizeof(v), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(v, *static_cast<float *>(buf1_.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.push_back(v);
+	EXPECT_EQ(l + sizeof(v), buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(v, *(reinterpret_cast<float *>(static_cast<uint8_t *>(buf2_.data()) + l)));
 }
 
 TEST_F(mutableBufferTest, PushBackDouble) {
-	FAIL();
+	double v = 3.141592653589793;
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.push_back(v);
+	EXPECT_EQ(sizeof(v), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(v, *static_cast<double *>(buf1_.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.push_back(v);
+	EXPECT_EQ(l + sizeof(v), buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(v, *(reinterpret_cast<double *>(static_cast<uint8_t *>(buf2_.data()) + l)));
 }
 
 TEST_F(mutableBufferTest, PushBackPOD) {
-	FAIL();
+	struct pod {
+		uint64_t v1;
+		uint32_t v2;
+		uint16_t v3;
+		uint8_t v4;
+		float v5;
+		double v6;
+		bool operator==(const pod &other) const {
+			return v1 == other.v1 
+				&& v2 == other.v2
+				&& v3 == other.v3
+				&& v4 == other.v4
+				&& v5 == other.v5
+				&& v6 == other.v6;
+		}
+	} v = { 0xdecafeddeadbeef, 0xdeadbeef, 0xdead, 0xde, 3.141592653589793, 1.414213562373504 };
+
+	// Append to an empty buffer
+	EXPECT_EQ(0, buf1_.length());
+	EXPECT_EQ(0, buf1_.capacity());
+	EXPECT_EQ(nullptr, buf1_.data());
+	buf1_.push_back(v);
+	EXPECT_EQ(sizeof(v), buf1_.length());
+	EXPECT_LE(buf1_.length(), buf1_.capacity());
+	EXPECT_NE(nullptr, buf1_.data());
+	EXPECT_EQ(v, *static_cast<pod *>(buf1_.data()));
+
+	// Append to a filled buffer
+	size_t l = buf2_.length();
+	EXPECT_NE(0, l);
+	EXPECT_LE(l, buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	buf2_.push_back(v);
+	EXPECT_EQ(l + sizeof(v), buf2_.length());
+	EXPECT_LE(buf2_.length(), buf2_.capacity());
+	EXPECT_NE(nullptr, buf2_.data());
+	EXPECT_EQ(v, *(reinterpret_cast<pod *>(static_cast<uint8_t *>(buf2_.data()) + l)));	
 }

@@ -7,23 +7,6 @@ using namespace com::nealrame;
 
 char test_data_str[] = "test data string";
 
-// class buffer_test : public testing::Test {
-// protected:
-// 	buffer_test() : buf2_(test_data_str, sizeof(test_data_str)) {
-// 	}
-
-// 	virtual void SetUp () {
-// 	}
-
-// 	virtual void TearDown () {
-// 	}
-
-// 	com::nealrame::utils::buffer buf1_;
-// 	com::nealrame::utils::buffer buf2_;
-// };
-
-// const char buffer_test::test_data_str[] = "Test data string";
-
 TEST(buffer, DefaultConstructor) {
 	utils::buffer buf;
 	
