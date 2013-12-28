@@ -4,39 +4,29 @@ CXX           = clang++
 COMMON_FLAGS  = -Wall -Werror -I$(CURDIR)/vendors/utf8
 CFLAGS        = $(COMMON_FLAGS)
 CXXFLAGS      = -std=c++11 $(COMMON_FLAGS)
-
-SOURCES      := $(wildcard $(CURDIR)/sources/*.cpp)
-SOURCES      += $(wildcard $(CURDIR)/sources/id3/*.cpp)
-SOURCES      += $(wildcard $(CURDIR)/sources/metadata/*.cpp)
-SOURCES      += $(wildcard $(CURDIR)/sources/utils/*.cpp)
-
-OBJECTS      := $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
-
-VPATH        := $(CURDIR)/sources
-VPATH        := $(VPATH):$(CURDIR)/sources/id3
-VPATH        := $(VPATH):$(CURDIR)/sources/metadata
-VPATH        := $(VPATH):$(CURDIR)/sources/utils
 DEPS         := $(CURDIR)/Makefile.depends
 
 export
 
-.PHONY: all clean depends realclean Debug Release
+.PHONY: all clean realclean Debug Release Tests
 
 all: Debug Release
 
 Debug Release:
-	@mkdir -p $@
-	$(MAKE) --no-print-directory -C $@ -f ../$@.mk $(TARGET)
+	@$(MAKE) --no-print-directory -f build_app.mk $@
 
-depends: $(SOURCES)
-	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRECTORIES) -MM $(SOURCES) > $(DEPS)
+Tests:
+	@$(MAKE) --no-print-directory -f build_tests.mk
 
 realclean: clean
+	rm -fr $(DEPS)
 	rm -fr log
 	rm -fr tags
 	rm -fr Debug
 	rm -fr Release
-
+	rm -fr Tests
+	
 clean:
 	rm -fr *~
-	rm -fr $(DEPS)
+	rm -fr 
+	rm -fr test_detail.xml

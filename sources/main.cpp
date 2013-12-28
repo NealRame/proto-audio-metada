@@ -11,77 +11,64 @@
 #include "id3/AudioID3Error.h"
 
 #include "utils/buffer.h"
+#include "utils/mutable_buffer.h"
 #include "utils/interleaved_iterator.h"
 
 int main(int argc, char **argv) {
 
 	using namespace com::nealrame;
 
-	char data1[] = { 0x42, 0x41, 0x42, 0x41 };
-	char data2[] = { 0x44, 0x43, 0x44, 0x43 };
-	char data3[] = { 0x46, 0x45, 0x46, 0x45 };
+	unsigned char data1[] = { 0x01, 0x01, 0x01, 0x01 };
+	unsigned char data2[] = { 0x02, 0x02, 0x02, 0x02 };
+	unsigned char data3[] = { 0x03, 0x03, 0x03, 0x03 };
 
-	utils::buffer buf1(data1, sizeof(data1), false);
-	utils::buffer buf2(data2, sizeof(data2), false);
-	utils::buffer buf3(data3, sizeof(data3), false);
+	unsigned char data4[sizeof(data1) + sizeof(data2) + sizeof(data3)];
 
-	utils::buffer buf(const_cast<const void *>((void *)data1), sizeof(data1));
+	std::iostream out(std::cout.rdbuf());
 
-	utils::buffer buf4;
-	utils::interlace<int16_t, 3>({{ buf1, buf2, buf3 }}, buf4);
-	
-	for (auto it = buf4.begin<uint8_t>(), end = buf4.end<uint8_t>();
-			it != end;
-			++it) {
-		std::cout
+	for (uint i = 0, pos = 1; i < sizeof(data4); ++i) {
+		out
 			<< std::setw(2)
 			<< std::noshowbase
 			<< std::hex
-			<< (unsigned int)*it << std::endl;
+			<< (unsigned int) data4[i] << (((pos + i)%6) ? ", " :"\n");
 	}
 
-	std::array<utils::buffer, 3> bufs;
-	utils::deinterlace<uint16_t, 3>(buf4, bufs);
+	out << "======" << std::endl;
 
-	for (unsigned int i = 0; i < 3; ++i) {
-		for (auto it = bufs[i].begin<uint8_t>(),
-			end = bufs[i].end<uint8_t>(); it != end; ++it) {
-			std::cout
-				<< std::setw(2)
-				<< std::noshowbase
-				<< std::hex
-				<< (unsigned int ) *it << ", ";
-		}
-		std::cout << std::endl;
+	utils::buffer buf1(data1, sizeof(data1));
+	utils::buffer buf2(data2, sizeof(data2));
+	utils::buffer buf3(data3, sizeof(data3));
+
+	utils::buffer buf4(data4, sizeof(data4));
+
+	utils::interlace<int16_t, 3>({{ buf1, buf2, buf3 }}, buf4);
+
+	for (uint i = 0, pos = 1; i < sizeof(data4); ++i) {
+		out
+			<< std::setw(2)
+			<< std::noshowbase
+			<< std::hex
+			<< (unsigned int) data4[i] << (((pos + i)%6) ? ", " :"\n");
 	}
 
-	// if (argc < 2) {
-	// 	std::cerr << "Argument missing!" << std::endl;
-	// 	return 1;
-	// }
+	std::cout << "======" << std::endl;
 
-	// std::ifstream input(argv[1], std::ifstream::in|std::ifstream::binary);
+	unsigned char data5[sizeof(data4)];
 
-	// try {
-	// 	ID3Tag tag;
+	utils::buffer buf5(data5,     4);
+	utils::buffer buf6(data5 + 4, 4);
+	utils::buffer buf7(data5 + 8, 4);	
 
-	// 	tag.init(input);
+	utils::deinterlace<uint16_t, 3>(buf4, {{ buf5, buf6, buf7 }});
 
-	// 	std::cout 
-	// 	<< "version:             " << tag.version() << std::endl
-	// 	<< "size:                " << tag.size() << std::endl
-	// 	<< "unsynchronized:      " << tag.unsynchronized() << std::endl
-	// 	<< "has extended header: " << tag.hasExtendedHeader() << std::endl
-	// 	<< "is experimental:     " << tag.isExperimental() << std::endl
-	// 	<< "has footer:          " << tag.hasFooter() << std::endl;
-		
-	// } catch (ID3Error e) {
-	// 	std::cerr << "No tag found!" << std::endl;
-	// 	return 1;
-	// } catch (std::ifstream::failure e) {
-	// 	std::cerr << "I/O error!" << std::endl;
-	// 	return 1;
-	// }
+	for (unsigned int i = 0, pos = 1; i < sizeof(data5); ++i) {
+		out
+			<< std::setw(2)
+			<< std::noshowbase
+			<< std::hex
+			<< (unsigned int ) data5[i] << (((pos + i)%4) ? ", " : "\n");
+	}
 
 	return 0;
 }

@@ -17,6 +17,8 @@
 			"-I/usr/include/x86_64-linux-gnu/c++/4.8",
 			"-I${project_path}/sources",
 			"-I${project_path}/vendors/utf8",
+			"-I${project_path}/vendors/gtest",
+			"-I${project_path}/vendors/gtest/include",
 		],
 		"sublimeclang_additional_language_options": {
 			"c++": [ "-std=c++11" ]
