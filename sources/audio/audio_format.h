@@ -1,0 +1,64 @@
+/**
+ * audio_format.h
+ *
+ * Created on: Dec 28, 2013
+ *     Author: Neal.Rame. <contact@nealrame.com>
+ */
+#ifndef AUDIO_FORMAT_H_
+#define AUDIO_FORMAT_H_
+
+#include <cstddef>
+
+#include "audio_error.h"
+
+namespace com {
+namespace nealrame {
+namespace audio {
+/// com::nealrame::audio::format
+/// ============================
+///
+/// 
+
+class format {
+public:
+	///
+	format (unsigned int channel_count, unsigned int sample_rate, unsigned int bit_depth);
+public:
+	///
+	unsigned int channel_count () const
+	{ return channel_count_; }
+	///
+	format & set_channel_count (unsigned int count) throw(audio::error);
+	///
+	unsigned int sample_rate () const
+	{ return sample_rate_; }
+	///
+	format & set_sample_rate (unsigned int rate) throw(audio::error);
+	////
+	unsigned int bit_depth () const 
+	{ return bit_depth_; }
+	///
+	format & set_bit_depth (unsigned int depth) throw(audio::error);
+	///
+	double duration (unsigned int frame_count) const;
+	///
+	double duration (size_t size) const;
+	///
+	unsigned int frame_count (size_t size) const;
+	///
+	unsigned int frame_count (double duration) const;
+	///
+	size_t size (unsigned int frame_count) const;
+	///
+	size_t size (double duration) const;
+
+private:
+	unsigned int channel_count_;
+	unsigned int sample_rate_;
+	unsigned int bit_depth_;
+};
+} // namespace audio
+} // namespace nealrame
+} // namespace com
+
+#endif /* AUDIO_BUFFER_H_ */
