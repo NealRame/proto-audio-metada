@@ -8,7 +8,6 @@
 using namespace com::nealrame::utils;
 
 mutable_buffer::mutable_buffer (size_t length, size_t capacity) {
-	// std::cout << "mutable_buffer (size_t length, size_t capacity)" << std::endl;
 	length_ = length;
 	capacity_ = std::max(length_, capacity);
 	data_ = capacity_ > 0 ? malloc(capacity_) : nullptr;
@@ -16,28 +15,23 @@ mutable_buffer::mutable_buffer (size_t length, size_t capacity) {
 
 mutable_buffer::mutable_buffer (size_t length) :
 	mutable_buffer(length, length) {
-	// std::cout << "mutable_buffer (size_t length)" << std::endl;
 }
 
 mutable_buffer::mutable_buffer () :
 	mutable_buffer(static_cast<size_t>(0), static_cast<size_t>(0)) {
-	// std::cout << "mutable_buffer ()" << std::endl;
 }
 
 mutable_buffer::mutable_buffer (const void *data, size_t length, size_t capacity) :
 	mutable_buffer(length, capacity) {
-	// std::cout << "mutable_buffer (const void *data, size_t length, size_t capacity)" << std::endl;
 	memcpy(data_, data, length_);
 }
 
 mutable_buffer::mutable_buffer (const void *data, size_t length) :
 	mutable_buffer(data, length, length) {
-	// std::cout << "mutable_buffer (const void *data, size_t length)" << std::endl;
 }
 
 mutable_buffer::mutable_buffer (const abstract_buffer &other) :
 	mutable_buffer(other.data(), other.length()) {
-	// std::cout << "mutable_buffer::mutable_buffer (const abstract_buffer &other)" << std::endl;
 }
 
 mutable_buffer::mutable_buffer (const mutable_buffer &other) :
@@ -59,7 +53,6 @@ mutable_buffer::~mutable_buffer () {
 }
 
 mutable_buffer & mutable_buffer::operator=(const abstract_buffer &other) {
-	// std::cout << "mutable_buffer & mutable_buffer::operator=(const abstract_buffer &other)" << std::endl;
 	length_ = other.length();
 	reserve(length_);
 	if (data_ != nullptr) {
@@ -69,7 +62,6 @@ mutable_buffer & mutable_buffer::operator=(const abstract_buffer &other) {
 }
 
 mutable_buffer & mutable_buffer::operator=(const mutable_buffer &other) {
-	// std::cout << "mutable_buffer & mutable_buffer::operator=(const mutable_buffer &other)" << std::endl;
 	length_ = other.length_;
 	reserve(other.capacity_);
 	if (data_ != nullptr) {
@@ -127,4 +119,12 @@ void mutable_buffer::swap (mutable_buffer &buffer) {
 	std::swap(capacity_, buffer.capacity_);
 	std::swap(data_, buffer.data_);
 	std::swap(length_, buffer.length_);
+}
+
+buffer mutable_buffer::slice(size_t begin) {
+	return buffer(*this).slice(begin);
+}
+
+buffer mutable_buffer::slice(size_t begin, size_t end) {
+	return buffer(*this).slice(begin, end);
 }

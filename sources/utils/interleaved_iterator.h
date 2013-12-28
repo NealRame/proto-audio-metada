@@ -13,21 +13,6 @@ namespace com {
 namespace nealrame {
 namespace utils {
 
-template<typename T>
-class type_ref_wrapper {
-public:
-	type_ref_wrapper(T &r) :
-		ref_(r) {
-	}
-	type_ref_wrapper & operator=(const T & v) {
-		ref_ = v;
-		return *this;
-	}
-	operator T &() { return ref_; }
-private:
-	T & ref_;
-};
-
 template<typename T, size_t N>
 class base_interleaved_iterator : 
 	std::iterator<std::random_access_iterator_tag,

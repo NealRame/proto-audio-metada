@@ -6,15 +6,10 @@ buffer::buffer (void *data, size_t length) {
 	set(data, length);
 }
 
-buffer::buffer (buffer &&other) {
-	data_ = other.data_;
-	length_ = other.length_;
-}
-
 void buffer::copy (const void *data, size_t len, size_t offset) {
 	if (offset < length_) {
-		memcpy(static_cast<uint8_t *>(data_) + offset, 
-			data, 
+		memcpy(static_cast<uint8_t *>(data_) + offset,
+			data,
 			std::min(len, length_ - offset));
 	}
 }
@@ -27,13 +22,13 @@ void buffer::fill (uint8_t value, size_t count, size_t offset) {
 	}
 }
 
-void buffer::set (buffer &other) {
-	set(other.data_, other.length_);
+void buffer::set (abstract_buffer &other) {
+	set(other.data(), other.length());
 }
 
 void buffer::set(void *data, size_t length) {
-	data_ = data;
 	length_ = length;
+	data_ = length_ ? data : nullptr;
 }
 
 buffer buffer::slice(size_t begin) {
@@ -42,8 +37,6 @@ buffer buffer::slice(size_t begin) {
 
 buffer buffer::slice(size_t begin, size_t end) {
 	end = std::min(end, length_ - 1);
-	return begin > end ?
-		buffer(nullptr, 0) :
-		buffer(static_cast<uint8_t *>(data_)
-				+ begin, end - begin  + 1);
+	return buffer(static_cast<uint8_t *>(data_) + begin,
+			begin > end ? end - begin : 0);
 }
