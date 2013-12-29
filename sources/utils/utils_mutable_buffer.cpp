@@ -2,8 +2,7 @@
 #include <cassert>
 #include <cstring>
 
-#include "mutable_buffer.h"
-#include <iostream>
+#include "utils_mutable_buffer.h"
 
 using namespace com::nealrame::utils;
 
@@ -96,6 +95,19 @@ void mutable_buffer::append (const abstract_buffer &buf) {
 
 void mutable_buffer::append (const std::string &s) {
 	copy(s.c_str(), s.length() + 1, length_);
+}
+
+void mutable_buffer::assign (void *data, size_t length, size_t capacity) {
+	if (data_) {
+		free(data_);
+	}
+	data_ = data;
+	capacity_ = capacity;
+	length_ = length;
+}
+
+void mutable_buffer::assign (void *data, size_t length) {
+	assign(data, length, length);
 }
 
 void mutable_buffer::reserve (size_t c) {

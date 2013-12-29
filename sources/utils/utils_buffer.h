@@ -6,7 +6,7 @@
 #include <iterator>
 #include <string>
 
-#include "abstract_buffer.h"
+#include "utils_abstract_buffer.h"
 
 namespace com {
 namespace nealrame {
@@ -19,7 +19,7 @@ namespace utils {
 /// underlying storage area_ (address and/or length).
 /// 
 /// It does not own the underlying data, and so is cheap to copy or assign.
-class buffer final : public abstract_buffer {
+class buffer : public abstract_buffer {
 public:
 	// Create a buffer given an `abstract_buffer`.
 	buffer (abstract_buffer &o) : buffer(o.data(), o.length()) { }

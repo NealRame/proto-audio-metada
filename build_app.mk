@@ -1,14 +1,17 @@
 SOURCES      := $(wildcard $(CURDIR)/sources/*.cpp)
-SOURCES      += $(wildcard $(CURDIR)/sources/id3/*.cpp)
-SOURCES      += $(wildcard $(CURDIR)/sources/metadata/*.cpp)
+SOURCES      += $(wildcard $(CURDIR)/sources/audio/*.cpp)
 SOURCES      += $(wildcard $(CURDIR)/sources/utils/*.cpp)
 
 OBJECTS      := $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
 
 VPATH        := $(CURDIR)/sources
-VPATH        := $(VPATH):$(CURDIR)/sources/id3
-VPATH        := $(VPATH):$(CURDIR)/sources/metadata
+VPATH        := $(VPATH):$(CURDIR)/sources/audio
 VPATH        := $(VPATH):$(CURDIR)/sources/utils
+
+INCLUDE_PATH += -I$(CURDIR)/sources
+
+CFLAGS       += $(INCLUDE_PATH)
+CXXFLAGS     += $(INCLUDE_PATH)
 
 export
 

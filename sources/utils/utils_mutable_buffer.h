@@ -6,8 +6,8 @@
 #include <iterator>
 #include <string>
 
-#include "abstract_buffer.h"
-#include "buffer.h"
+#include "utils_abstract_buffer.h"
+#include "utils_buffer.h"
 
 namespace com {
 namespace nealrame {
@@ -20,7 +20,7 @@ namespace utils {
 /// 
 /// As the underlying datas are owned of the buffer, assign a buffer to
 /// another or create a buffer may cost some memory allocations and copies.
-class mutable_buffer final : public abstract_buffer {
+class mutable_buffer : public abstract_buffer {
 public:
 	/// Create a buffer with a given length and a given capacity.
 	mutable_buffer (size_t length, size_t capacity);
@@ -65,6 +65,12 @@ public:
 	/// Append the given `abstract_buffer` to this buffer, increasing its
 	/// capacity if needed.
 	void append (const abstract_buffer &);
+	/// Assign the given data. This buffer became responsible of the 
+	/// passed data and will release memory location when destructed.
+	void assign (void *data, size_t length, size_t capacity);
+	/// Assign the given data. This buffer became responsible of the 
+	/// passed data and will release memory location when destructed.
+	void assign (void *data, size_t length);
 	/// Copy len bytes from data to this buffer starting at a given 
 	/// offset, increasing its capacity if needed.
 	virtual void copy (const void *data, size_t len, size_t offset);

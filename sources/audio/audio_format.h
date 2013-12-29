@@ -9,6 +9,10 @@
 
 #include <cstddef>
 
+#if defined(TEST)
+#	include <ostream>
+#endif
+
 #include "audio_error.h"
 
 namespace com {
@@ -18,11 +22,13 @@ namespace audio {
 /// ============================
 ///
 /// 
-
 class format {
 public:
 	///
-	format (unsigned int channel_count, unsigned int sample_rate, unsigned int bit_depth);
+	format (unsigned int channel_count, unsigned int sample_rate, unsigned int bit_depth) throw(audio::error);
+public:
+	///
+	bool operator==(const format &other) const;
 public:
 	///
 	unsigned int channel_count () const
@@ -51,12 +57,16 @@ public:
 	size_t size (unsigned int frame_count) const;
 	///
 	size_t size (double duration) const;
-
 private:
 	unsigned int channel_count_;
 	unsigned int sample_rate_;
 	unsigned int bit_depth_;
 };
+
+#if defined(TEST)
+	void PrintTo (const format &, ::std::ostream *os);
+#endif
+
 } // namespace audio
 } // namespace nealrame
 } // namespace com

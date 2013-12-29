@@ -1,5 +1,5 @@
-CFLAGS    += -O0 -g
-CXXFLAGS  += -O0 -g
+CFLAGS    += -O0 -g -DDEBUG -DTEST
+CXXFLAGS  += -O0 -g -DDEBUG -DTEST
 
 all: $(OBJECTS) libgtest.a gtest_main.o
 	$(CXX) $(CXXFLAGS) -pthread -o proto-audio-metadata-test $^

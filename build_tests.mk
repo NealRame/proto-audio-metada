@@ -1,17 +1,15 @@
-SOURCES      := $(wildcard $(CURDIR)/sources/id3/*.cpp)
+SOURCES      := $(wildcard $(CURDIR)/sources/audio/*.cpp)
 SOURCES      += $(wildcard $(CURDIR)/sources/tests/*.cpp)
-SOURCES      += $(wildcard $(CURDIR)/sources/metadata/*.cpp)
 SOURCES      += $(wildcard $(CURDIR)/sources/utils/*.cpp)
 
 OBJECTS      := $(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
 
-VPATH        := $(CURDIR)/sources/tests
-VPATH        := $(VPATH):$(CURDIR)/sources/id3
-VPATH        := $(VPATH):$(CURDIR)/sources/metadata
+VPATH        := $(CURDIR)/sources/audio
+VPATH        := $(VPATH):$(CURDIR)/sources/tests
 VPATH        := $(VPATH):$(CURDIR)/sources/utils
 
-
-INCLUDE_PATH  = -isystem $(CURDIR)/vendors/gtest/include 
+INCLUDE_PATH  = -I$(CURDIR)/sources
+INCLUDE_PATH += -isystem $(CURDIR)/vendors/gtest/include 
 INCLUDE_PATH += -I$(CURDIR)/vendors/gtest
 INCLUDE_PATH += -isystem $(CURDIR)/vendors/gmock/include
 INCLUDE_PATH += -I$(CURDIR)/vendors/gmock

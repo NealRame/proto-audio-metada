@@ -7,6 +7,10 @@
 #ifndef AUDIO_ERROR_H_
 #define AUDIO_ERROR_H_
 
+#if defined(TEST)
+#	include <ostream>
+#endif
+
 namespace com {
 namespace nealrame {
 namespace audio {
@@ -16,8 +20,11 @@ namespace audio {
 /// 
 class error {
 public:
-	enum class status {
+	enum status {
 		FormatBadValue,
+		FormatBadChannelCountValue,
+		FormatBadSampleRateValue,
+		FormatBadBitDepthValue,
 		FormatUndefined,
 		NotImplemented,
 	};
@@ -28,6 +35,11 @@ public:
 public:
 	const status status;
 };
+
+#if defined(TEST)
+	void PrintTo (const enum error::status s, ::std::ostream *os);
+#endif
+
 } // namespace audio
 } // namespace nealrame
 } // namespace com

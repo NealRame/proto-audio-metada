@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-#include "../utils/buffer.h"
-
 #include <memory>
+#include <gtest/gtest.h>
+
+#include <utils/buffer>
 
 using namespace com::nealrame;
 

@@ -1,9 +1,10 @@
-#include <gtest/gtest.h>
-#include "../utils/buffer.h"
-#include "../utils/mutable_buffer.h"
-
 #include <cstring>
 #include <memory>
+
+#include <gtest/gtest.h>
+
+#include <utils/buffer>
+#include <utils/mutable_buffer>
 
 using namespace com::nealrame;
 

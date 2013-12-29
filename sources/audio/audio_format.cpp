@@ -8,9 +8,24 @@
 
 using namespace com::nealrame::audio;
 
+format::format (
+	unsigned int channel_count, 
+	unsigned int sample_rate, 
+	unsigned int bit_depth) throw(audio::error) {
+	set_channel_count(channel_count);
+	set_sample_rate(sample_rate);
+	set_bit_depth(bit_depth);
+}
+
+bool format::operator==(const format &other) const {
+	return channel_count_ == other.channel_count_
+		&& sample_rate_ == other.sample_rate_
+		&& bit_depth_ == other.bit_depth_;
+}
+
 format & format::set_channel_count (unsigned int count) throw(audio::error) {
 	if (count < 1) {
-		error::raise(error::status::FormatBadValue);
+		error::raise(error::FormatBadChannelCountValue);
 	}
 	channel_count_ = count;
 	return *this; 
@@ -27,7 +42,7 @@ format & format::set_sample_rate (unsigned int rate) throw(audio::error) {
 			sample_rate_ = rate;
 			break;
 		default:
-			error::raise(error::status::FormatBadValue);
+			error::raise(error::FormatBadSampleRateValue);
 	}
 	return *this;
 }
@@ -39,7 +54,7 @@ format & format::set_bit_depth (unsigned int depth) throw(audio::error) {
 			bit_depth_ = depth;
 			break;
 		default:
-			error::raise(error::status::FormatBadValue);
+			error::raise(error::FormatBadBitDepthValue);
 	}
 	return *this;
 }
@@ -67,3 +82,13 @@ size_t format::size (unsigned int frame_count) const {
 size_t format::size (double duration) const {
 	return size(frame_count(duration));
 }
+
+#if defined(TEST)
+void com::nealrame::audio::PrintTo (const format &fmt, ::std::ostream *os) {
+	*os 	<< "{ "	<< "channels:"
+			<< fmt.channel_count() << ", "
+			<< "sample_rate: " << fmt.sample_rate() << ", "
+			<< "bit_depth: " << fmt.bit_depth() 
+		<< " }";
+}
+#endif
